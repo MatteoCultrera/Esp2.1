@@ -25,10 +25,6 @@ namespace EspInterface.ViewModels
             return ManagedWrapper.get_value(native_instance_);
         }
 
-        public void dump() {
-
-        }
-
         public void set_value(int value)
         {
             ManagedWrapper.set_value(native_instance_, value);
