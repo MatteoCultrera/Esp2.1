@@ -206,7 +206,7 @@ namespace EspInterface.ViewModels
 
             if (boardsConnected == boardObjs.ToArray<Board>().Length) {
                 Title = "All Boards Connected";
-                Subtitle = "";
+                Subtitle = "Drag them in order into the Grid";
                 foreach (Board b in BoardObjs) {
                     b.subtitle = "drag to position";
                 }
@@ -247,7 +247,6 @@ namespace EspInterface.ViewModels
                     ButtonEnabled = false;
                     for (int i = 1; i <= boards; i++) 
                         BoardObjs.Add(new Board("/Resources/Icons/Boards/Board"+i+"N.png", "Board " + i.ToString(), false, i));
-
                     break;
                 case 2:
                     screen = 3;
@@ -265,6 +264,16 @@ namespace EspInterface.ViewModels
 
                     Thread t = new Thread(new ThreadStart(thr.CheckMacAdddr));
                     t.Start();
+                    break;
+                case 3:
+                    string s = "";
+                    foreach (Board b in BoardObjs) {
+                      
+                        s += b.BoardName + " " + b.posX + " " + b.posY+"\n";
+
+
+                    }
+                    MessageBox.Show(s);
                     break;
 
             }
@@ -292,15 +301,17 @@ namespace EspInterface.ViewModels
             }
             if (i == BoardObjs.ToArray<Board>().Length) {
                 Title = "All Boards Positioned";
+                Subtitle = "";
                 ButtonEnabled = true;
             }
             else
             {
                 Title = "All Boards Connected";
+                Subtitle = "Drag them in order into the Grid";
                 ButtonEnabled = false;
             }
         }
-
+        
         public string Title {
             get {
                 return this._title;
@@ -314,6 +325,7 @@ namespace EspInterface.ViewModels
                 }
             }
         }
+
         public string Subtitle {
             get {
                 return this._subtitle;
@@ -358,7 +370,6 @@ namespace EspInterface.ViewModels
 
         }
 
-
         public bool macRepeated(string mac) {
             foreach(Board b in boardObjs) {
                 if (b.MAC != null)
@@ -381,14 +392,6 @@ namespace EspInterface.ViewModels
             if (Title.Equals("All Boards Connected"))
                 return true;
             return false;
-        }
-
-        public void StartDragging() {
-            draggingBoardVisibility = "Visible";
-        }
-
-        public void StopDragging() {
-            draggingBoardVisibility = "Hidden";
         }
 
         public SetupModel(){

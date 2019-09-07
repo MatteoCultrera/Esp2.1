@@ -29,6 +29,7 @@ namespace EspInterface.Views
     public partial class Setup : UserControl
     {
         public Board draggingBoard;
+        private BoardInGrid draggingBoardPositioned;
         private bool returningDrag;
         private Point initialPosition;
         private Image draggingImage;
@@ -37,6 +38,7 @@ namespace EspInterface.Views
         private static double offset = 29.4;
         private int boardPosX, boardPosY;
         private int[,] gridPos;
+        private bool isPositioned;
 
         public Setup()
         {
@@ -75,28 +77,6 @@ namespace EspInterface.Views
             else
                 return true;
         }
-
-        public void RemoveBoardInGrid(int x, int y) {
-            BoardInGrid toRemove = null;
-            foreach (BoardInGrid b in boardsInGrid){
-                if (b.getX() == x && b.getY() == y) {
-                    
-                    toRemove = b;
-                }
-            }
-
-            if (toRemove == null)
-                return;
-            else {
-                SetupModel sm = (SetupModel)(this.DataContext);
-                canvas.Children.Remove(toRemove.getCan());
-                boardsInGrid.Remove(toRemove);
-                gridPos[x, y] = 0;
-                sm.allPositioned();
-            }
-
-        }
-
         
         private void handleTextNumBoards(object sender, TextCompositionEventArgs e) {
             Regex regex = new Regex("[^1-9]+");
@@ -135,7 +115,8 @@ namespace EspInterface.Views
 
             e.Handled = !regex.IsMatch(e.Text);
         }
-         private void macEntered (object sender, KeyEventArgs e){
+
+        private void macEntered (object sender, KeyEventArgs e){
 
             TextBox box = sender as TextBox;
             Regex rxMacAddress = new Regex(@"^[0-9a-fA-F]{2}(((:[0-9a-fA-F]{2}){5})|((:[0-9a-fA-F]{2}){5}))$");
@@ -202,9 +183,8 @@ namespace EspInterface.Views
         }
 
         public void startDragging(object sender, MouseEventArgs e) {
+           
             SetupModel sm = (SetupModel)(this.DataContext);
-
-            
 
             if (!sm.canDrag())
                 return;
@@ -212,7 +192,12 @@ namespace EspInterface.Views
             Image im = sender as Image;
             draggingBoard = im.DataContext as Board;
 
+            if (draggingBoard.boardNum - 1 != boardsInGrid.Count)
+                return;
+
             if (canvas.CaptureMouse()) {
+
+                isPositioned = false;
                 mousePosition = e.GetPosition(canvas);
 
                 Point p1 = canvas.TranslatePoint(new Point(0, 0), Window.GetWindow(canvas));
@@ -285,53 +270,11 @@ namespace EspInterface.Views
             if (draggingImage!=null)
             {
                 returningDrag = true;
-                canvas.ReleaseMouseCapture();    
-
-                if (!inGrid(Canvas.GetLeft(draggingImage), Canvas.GetTop(draggingImage)))
+                canvas.ReleaseMouseCapture();
+                if (!isPositioned)
                 {
-                    DoubleAnimation da1 = new DoubleAnimation()
+                    if (!inGrid(Canvas.GetLeft(draggingImage), Canvas.GetTop(draggingImage)))
                     {
-                        From = Canvas.GetLeft(draggingImage),
-                        To = initialPosition.X,
-                        Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
-                    };
-
-                    DoubleAnimation da2 = new DoubleAnimation()
-                    {
-                        From = Canvas.GetTop(draggingImage),
-                        To = initialPosition.Y,
-                        Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
-                    };
-
-                    da1.Completed += new EventHandler(endDragging);
-
-                    draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
-                    draggingImage.BeginAnimation(Canvas.TopProperty, da2);
-                }
-                else {
-                    if (nearestSpotInGrid())
-                    {
-
-                        DoubleAnimation da1 = new DoubleAnimation()
-                        {
-                            From = Canvas.GetLeft(draggingImage),
-                            To = initialPosition.X,
-                            Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.1)),
-                        };
-
-                        DoubleAnimation da2 = new DoubleAnimation()
-                        {
-                            From = Canvas.GetTop(draggingImage),
-                            To = initialPosition.Y,
-                            Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.1)),
-                        };
-
-                        da1.Completed += new EventHandler(endDraggingInGrid);
-                        draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
-                        draggingImage.BeginAnimation(Canvas.TopProperty, da2);
-                    }
-                    else {
-
                         DoubleAnimation da1 = new DoubleAnimation()
                         {
                             From = Canvas.GetLeft(draggingImage),
@@ -350,6 +293,124 @@ namespace EspInterface.Views
 
                         draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
                         draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                    }
+                    else
+                    {
+                        if (nearestSpotInGrid())
+                        {
+
+                            DoubleAnimation da1 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetLeft(draggingImage),
+                                To = initialPosition.X,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.1)),
+                            };
+
+                            DoubleAnimation da2 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetTop(draggingImage),
+                                To = initialPosition.Y,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.1)),
+                            };
+
+                            da1.Completed += new EventHandler(endDraggingInGrid);
+                            draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
+                            draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                        }
+                        else
+                        {
+
+                            DoubleAnimation da1 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetLeft(draggingImage),
+                                To = initialPosition.X,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
+                            };
+
+                            DoubleAnimation da2 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetTop(draggingImage),
+                                To = initialPosition.Y,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
+                            };
+
+                            da1.Completed += new EventHandler(endDragging);
+
+                            draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
+                            draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                        }
+
+                    }
+                }
+                else
+                {
+                     if (!inGrid(Canvas.GetLeft(draggingImage), Canvas.GetTop(draggingImage)))
+                    {
+                        DoubleAnimation da1 = new DoubleAnimation()
+                        {
+                            From = Canvas.GetLeft(draggingImage),
+                            To = initialPosition.X,
+                            Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
+                        };
+
+                        DoubleAnimation da2 = new DoubleAnimation()
+                        {
+                            From = Canvas.GetTop(draggingImage),
+                            To = initialPosition.Y,
+                            Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
+                        };
+
+                        da1.Completed += new EventHandler(endDraggingPositioned);
+
+                        draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
+                        draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                    }
+                    else
+                    {
+                        if (nearestSpotInGrid())
+                        {
+
+                            DoubleAnimation da1 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetLeft(draggingImage),
+                                To = initialPosition.X,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.1)),
+                            };
+
+                            DoubleAnimation da2 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetTop(draggingImage),
+                                To = initialPosition.Y,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.1)),
+                            };
+
+                            da1.Completed += new EventHandler(endDraggingInGridPositioned);
+                            draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
+                            draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                        }
+                        else
+                        {
+
+                            DoubleAnimation da1 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetLeft(draggingImage),
+                                To = initialPosition.X,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
+                            };
+
+                            DoubleAnimation da2 = new DoubleAnimation()
+                            {
+                                From = Canvas.GetTop(draggingImage),
+                                To = initialPosition.Y,
+                                Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
+                            };
+
+                            da1.Completed += new EventHandler(endDraggingPositioned);
+
+                            draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
+                            draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                        }
+
                     }
 
                 }
@@ -440,6 +501,47 @@ namespace EspInterface.Views
             
         }
 
+        private void endDraggingPositioned(Object sender, EventArgs e) {
+
+            returningDrag = false;
+            canvas.Children.Remove(draggingImage);
+            if (draggingBoardPositioned != null) {
+
+                //Make Board Appear
+                draggingBoardPositioned.imageAppear();
+
+            }
+
+            draggingImage = null;
+        }
+
+        private void endDraggingInGridPositioned(object sender, EventArgs e) {
+            returningDrag = false;
+            SetupModel sm = (SetupModel)(this.DataContext);
+            canvas.Children.Remove(draggingImage);
+            if (draggingBoard != null)
+            {
+                //Move Board and Appear
+                //CHANGE GridPos to update noew positions
+                //AddBoardInGrid(draggingBoard, boardPosX, boardPosY)
+
+                Canvas.SetLeft(draggingBoardPositioned.getCan(), initialPosX + offset * boardPosX);
+                Canvas.SetBottom(draggingBoardPositioned.getCan(), initialPosY + offset * boardPosY);
+
+
+                gridPos[draggingBoardPositioned.getX(), draggingBoardPositioned.getY()] = 0;
+                gridPos[boardPosX, boardPosY] = 1;
+
+                draggingBoardPositioned.setX(boardPosX);
+                draggingBoardPositioned.setY(boardPosY);
+
+                draggingBoardPositioned.imageAppear();
+
+
+            }
+            draggingImage = null;
+        }
+
         
 
         public class BoardInGrid
@@ -448,6 +550,7 @@ namespace EspInterface.Views
             int posX, posY;
             Canvas can;
             Image boardImage;
+            BitmapImage bitmap;
             Button boardButton;
             Setup set;
 
@@ -455,7 +558,7 @@ namespace EspInterface.Views
 
                 can = new Canvas();
 
-                BitmapImage bitmap = new BitmapImage(new Uri(imgSource, UriKind.RelativeOrAbsolute));
+                bitmap = new BitmapImage(new Uri(imgSource, UriKind.RelativeOrAbsolute));
 
                 this.posBoard = posBoard;
 
@@ -474,43 +577,36 @@ namespace EspInterface.Views
 
                 };
 
-                Style style = father.FindResource("DeleteButton") as Style;
-
-                boardButton = new Button {
-                    Width = 15,
-                    Style = style,
-                    Height = 15,
-                    IsEnabled = false,
-                    
-                    Visibility = Visibility.Collapsed
-                 };
-
-                boardButton.Click += removeMe;
 
                 can.Children.Add(boardImage);
-                can.Children.Add(boardButton);
-
-                can.MouseEnter += new MouseEventHandler(buttonGridMouseEnter);
-                can.MouseLeave += new MouseEventHandler(buttonGridMouseExit);
 
                 this.posX = posX;
                 this.posY = posY;
 
+                boardImage.MouseDown += new MouseButtonEventHandler(startDraggingPositioned);
+
+            }
+
+            public Image getBoardImage() {
+                return boardImage;
+            }
+
+            public void imageAppear() {
+                boardImage.Visibility = Visibility.Visible;
             }
 
             public Canvas getCan() {
                 return can;
             }
 
-            public void removeMe(object sender, RoutedEventArgs e) {
-                posBoard.positioned = false;
-                posBoard.dragging = false;
-                posBoard.subtitle = "drag to position";
-                set.RemoveBoardInGrid(this.posX, this.posY);
-                posBoard = null;
-                can = null;
-                boardButton = null;
-                boardImage = null;
+            public void setX(int x) {
+                this.posX = x;
+                posBoard.posX = x;
+            }
+
+            public void setY(int y) {
+                this.posY = y;
+                posBoard.posY = y;
             }
 
             public int getX() {
@@ -521,30 +617,49 @@ namespace EspInterface.Views
                 return this.posY;
             }
 
-            public void buttonGridMouseEnter(object sender, MouseEventArgs e)
+            public void startDraggingPositioned(object sender, MouseEventArgs e)
             {
-                Canvas send = sender as Canvas;
 
-                Button but = send.Children.OfType<Button>().First<Button>();
-                if (but != null)
+                Image im = sender as Image;
+                set.draggingBoardPositioned = this;
+
+                if (set.canvas.CaptureMouse())
                 {
-                    but.Visibility = Visibility.Visible;
-                    but.IsEnabled = true;
+
+                    set.isPositioned = true;
+                    set.mousePosition = e.GetPosition(set.canvas);
+
+                    Point p1 = set.canvas.TranslatePoint(new Point(0, 0), Window.GetWindow(set.canvas));
+                    Point p = im.TranslatePoint(new Point(0, 0), Window.GetWindow(im));
+
+                    set.draggingImage = new Image
+                    {
+                        Source = bitmap,
+                        Width = 35,
+                        Height = 35,
+                        Visibility = Visibility.Visible
+
+                    };
+
+                    set.canvas.Children.Add(set.draggingImage);
+                    boardImage.Visibility = Visibility.Collapsed;
+
+                    p.X = p.X - p1.X;
+                    p.Y = p.Y - p1.Y;
+
+
+                    //Now P stores the initial position of the image
+                    set.initialPosition = p;
+
+                    //MessageBox.Show(" " + draggingBoard.BoardName + " x: " + p.X + " y: " + p.Y+ "\ninitialPos x:"+initialPosition.X + " y: "+initialPosition.Y);
+
+                    Canvas.SetLeft(set.draggingImage, set.initialPosition.X);
+                    Canvas.SetTop(set.draggingImage, set.initialPosition.Y);
+                    Panel.SetZIndex(set.draggingImage, 1);
                 }
-
             }
-            public void buttonGridMouseExit(object sender, MouseEventArgs e)
-            {
-                Canvas send = sender as Canvas;
 
-                Button but = send.Children.OfType<Button>().First<Button>();
-                if (but != null)
-                {
-                    but.Visibility = Visibility.Collapsed;
-                    but.IsEnabled = false;
-                }
 
-            }
         };
 
     }
