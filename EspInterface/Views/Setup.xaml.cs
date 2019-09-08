@@ -62,12 +62,19 @@ namespace EspInterface.Views
             canvas.Children.Add(board.getCan());
             Canvas.SetLeft(board.getCan(), initialPosX + offset * x);
             Canvas.SetBottom(board.getCan(), initialPosY + offset * y);
+
+            board.roomLine.X1 = initialPosX + offset * x + 17.5;
+            board.roomLine.Y1 = 575 - (initialPosY + offset * y) + 17.5;
             boardsInGrid.Add(board);
             gridPos[x, y] = 1;
 
             SetupModel sm = (SetupModel)(this.DataContext);
 
             sm.allPositioned();
+
+            if (boardsInGrid.Count != sm.boards) {
+                sm.dragNext(boardsInGrid.Count);
+            }
 
         }
 
@@ -258,7 +265,16 @@ namespace EspInterface.Views
 
                 Canvas.SetLeft(draggingImage, newPosX);
                 Canvas.SetTop(draggingImage, newPosY);
+
+                if (draggingBoardPositioned != null) {
+                    //MessageBox.Show("newPosX: "+newPosX+" startingX: "+draggingBoardPositioned.startingX);
+
+                    draggingBoardPositioned.roomLine.X1 = newPosX + 17.5;
+                    draggingBoardPositioned.roomLine.Y1 = newPosY + 17.5;
+
+                }
             }
+            
         }
         
         private void CanvasMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -364,6 +380,10 @@ namespace EspInterface.Views
 
                         draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
                         draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                        //draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, da1);
+                        //draggingBoardPositioned.roomLine.BeginAnimation(Line.Y1Property, da2);
+
+
                     }
                     else
                     {
@@ -387,6 +407,8 @@ namespace EspInterface.Views
                             da1.Completed += new EventHandler(endDraggingInGridPositioned);
                             draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
                             draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                            //draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, da1);
+                            //draggingBoardPositioned.roomLine.BeginAnimation(Line.Y1Property, da2);
                         }
                         else
                         {
@@ -409,6 +431,8 @@ namespace EspInterface.Views
 
                             draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
                             draggingImage.BeginAnimation(Canvas.TopProperty, da2);
+                            draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, da1);
+                            draggingBoardPositioned.roomLine.BeginAnimation(Line.Y1Property, da2);
                         }
 
                     }
@@ -484,6 +508,7 @@ namespace EspInterface.Views
                 AddBoardInGrid(draggingBoard, boardPosX, boardPosY);
             }
             draggingImage = null;
+            draggingBoardPositioned = null;
         }
 
    
@@ -498,6 +523,7 @@ namespace EspInterface.Views
                 draggingBoard.subtitle = "drag to position";
             }
             draggingImage = null;
+            draggingBoardPositioned = null;
             
         }
 
@@ -509,6 +535,9 @@ namespace EspInterface.Views
 
                 //Make Board Appear
                 draggingBoardPositioned.imageAppear();
+
+                draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, null);
+                draggingBoardPositioned.roomLine.BeginAnimation(Line.Y1Property, null);
 
             }
 
@@ -537,6 +566,9 @@ namespace EspInterface.Views
 
                 draggingBoardPositioned.imageAppear();
 
+                draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, null);
+                draggingBoardPositioned.roomLine.BeginAnimation(Line.Y1Property, null);
+
 
             }
             draggingImage = null;
@@ -551,8 +583,9 @@ namespace EspInterface.Views
             Canvas can;
             Image boardImage;
             BitmapImage bitmap;
-            Button boardButton;
             Setup set;
+            public Line roomLine;
+            public double startingX, startingY;
 
             public BoardInGrid(Canvas father, Board posBoard, int posX, int posY, string imgSource, Setup set) {
 
@@ -582,6 +615,35 @@ namespace EspInterface.Views
 
                 this.posX = posX;
                 this.posY = posY;
+
+                SolidColorBrush color = new SolidColorBrush();
+                color.Color = Colors.White;
+
+                roomLine = new Line()
+                {
+                    StrokeThickness = 2,
+                    Stroke = color
+                };
+
+                
+
+                
+                Binding sourceX = new Binding("X1");
+                sourceX.Source = boardImage;
+
+                /*
+
+                Binding sourceY = new Binding("sourceY");
+                sourceY.Source = boardImage;*/
+
+                //roomLine.SetBinding(Line.X1Property, sourceX);
+                //roomLine.SetBinding(Line.Y1Property, sourceY);
+
+                
+
+                //roomLine.Visibility = Visibility.Collapsed;
+
+                set.canvas.Children.Add(roomLine);
 
                 boardImage.MouseDown += new MouseButtonEventHandler(startDraggingPositioned);
 
@@ -641,7 +703,11 @@ namespace EspInterface.Views
 
                     };
 
+                    startingX = set.initialPosition.X;
+                    startingY = set.initialPosition.Y;
+
                     set.canvas.Children.Add(set.draggingImage);
+
                     boardImage.Visibility = Visibility.Collapsed;
 
                     p.X = p.X - p1.X;
@@ -651,7 +717,13 @@ namespace EspInterface.Views
                     //Now P stores the initial position of the image
                     set.initialPosition = p;
 
-                    //MessageBox.Show(" " + draggingBoard.BoardName + " x: " + p.X + " y: " + p.Y+ "\ninitialPos x:"+initialPosition.X + " y: "+initialPosition.Y);
+                    
+
+                    //TODO: change this line because must be visible when second board is placed
+                    roomLine.Visibility = Visibility.Visible;
+
+                    roomLine.X1 = set.initialPosition.X + 17.5;
+                    roomLine.Y1 = set.initialPosition.Y + 17.5;
 
                     Canvas.SetLeft(set.draggingImage, set.initialPosition.X);
                     Canvas.SetTop(set.draggingImage, set.initialPosition.Y);
@@ -660,8 +732,10 @@ namespace EspInterface.Views
             }
 
 
+
         };
 
+        
     }
 }
 

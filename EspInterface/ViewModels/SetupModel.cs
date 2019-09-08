@@ -116,7 +116,7 @@ namespace EspInterface.ViewModels
         private string _title;
         private string _subtitle;
         private string _numBoards;
-        private int boards;
+        public int boards;
         private int screen;
         private bool _buttonEnabled;
         private ICommand _okButton;
@@ -207,9 +207,7 @@ namespace EspInterface.ViewModels
             if (boardsConnected == boardObjs.ToArray<Board>().Length) {
                 Title = "All Boards Connected";
                 Subtitle = "Drag them in order into the Grid";
-                foreach (Board b in BoardObjs) {
-                    b.subtitle = "drag to position";
-                }
+                boardObjs[0].subtitle = "Drag to position";
             }
 
         }
@@ -405,6 +403,10 @@ namespace EspInterface.ViewModels
             okButton = new RelayCommand(okClick, param => this.ButtonEnabled);
             screen = 1;
             draggingBoardVisibility = "Collapsed";
+        }
+
+        public void dragNext(int i) {
+            BoardObjs[i].subtitle = "Drag to position";
         }
 
 
