@@ -239,7 +239,7 @@ namespace EspInterface.ViewModels
                     screen = 2;
                     numBoards = "";
                     Title = "Insert Boards MAC";
-                    Subtitle = "";
+                    Subtitle = "You can also change board's names";
                     NotifyPropertyChanged("colorTextBox");
                     NotifyPropertyChanged("textBoxEnabled");
                     ButtonEnabled = false;
