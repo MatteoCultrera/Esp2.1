@@ -190,13 +190,66 @@ namespace EspInterface.Views
            
         }
 
+        private void nameEntered(object sender, KeyEventArgs e)
+        {
+
+            TextBox box = sender as TextBox;
+            SetupModel sm = (SetupModel)(this.DataContext);
+            Board b = box.DataContext as Board;
+
+            if (e.Key == Key.Return || e.Key == Key.Tab)
+            {
+                e.Handled = true;
+                if (box.Text.Length == 0)
+                {
+                    box.Text = b.BoardName;
+                    Keyboard.ClearFocus();
+                }
+                else
+                {
+                    BindingExpression binding = box.GetBindingExpression(TextBox.TextProperty);
+                    Keyboard.ClearFocus();
+                    binding.UpdateSource();
+                }
+            }
+
+        }
+
+        private void BoxName_GotFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox box = sender as TextBox;
+            box.CaretIndex = box.Text.Length;
+        }
+
+        private void BoxName_LostFocus(object sender, RoutedEventArgs e)
+        {
+
+            TextBox box = sender as TextBox;
+            SetupModel sm = (SetupModel)(this.DataContext);
+            Board b = box.DataContext as Board;
+
+            if (box.Text.Length == 0)
+            {
+                box.Text = b.BoardName;
+                Keyboard.ClearFocus();
+            }
+            else
+            {
+                BindingExpression binding = box.GetBindingExpression(TextBox.TextProperty);
+                Keyboard.ClearFocus();
+                binding.UpdateSource();
+            }
+            
+        }
+
         private void BoxT_LostFocus(object sender, RoutedEventArgs e)
         {
 
             TextBox box = sender as TextBox;
             Regex rxMacAddress = new Regex(@"^[0-9a-fA-F]{2}(((:[0-9a-fA-F]{2}){5})|((:[0-9a-fA-F]{2}){5}))$");
+            SetupModel sm = (SetupModel)(this.DataContext);
 
-            if (!rxMacAddress.IsMatch(box.Text) && box.Text.Length != 0)
+            if ((!rxMacAddress.IsMatch(box.Text) || sm.macRepeated(box.Text.ToString())) && box.Text.Length != 0)
             {
                 Storyboard redFlash = box.TryFindResource("redFlash") as Storyboard;
                 box.Text = "";
@@ -205,7 +258,6 @@ namespace EspInterface.Views
             else
             {
                 BindingExpression binding = box.GetBindingExpression(TextBox.TextProperty);
-                SetupModel sm = (SetupModel)(this.DataContext);
                 Keyboard.ClearFocus();
                 binding.UpdateSource();
                 sm.checkMacs();

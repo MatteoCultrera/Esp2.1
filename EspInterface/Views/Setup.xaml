@@ -15,6 +15,20 @@
                 <ColorAnimation Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)" From="#9EA3AA" To="#FF623F" Duration="0:0:0.5" AutoReverse="True"/>
             </Storyboard>
 
+            <Style x:Key="nameBox" TargetType="TextBox">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsKeyboardFocused, RelativeSource={RelativeSource Self}}" Value="false">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TextBox">
+                                    <TextBlock Text="{TemplateBinding Text}"  TextTrimming="CharacterEllipsis"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <Style x:Key="OkButton" TargetType="Button">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -118,7 +132,7 @@
                                         <RowDefinition Height="0.6*" />
                                         <RowDefinition Height="1*" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock Text="{Binding BoardName}" FontSize="20" Foreground="{Binding BoardNameColor}" Grid.Row="0"/>
+                                    <TextBox Style="{StaticResource nameBox}" Text="{Binding BoardName, UpdateSourceTrigger=Explicit}" LostFocus="BoxName_LostFocus" GotFocus="BoxName_GotFocus"  KeyDown="nameEntered" FontSize="18" Foreground="{Binding BoardNameColor}" Width="110" HorizontalAlignment="Left" BorderThickness="0" Background="#3C4149" Grid.Row="0"/>
                                     <TextBlock Text="MAC address:" FontSize="12" Grid.Row="1" Foreground="{Binding ElementName=BoxT, Path=Foreground}" Name="MACaddr"/>
                                     <StackPanel Grid.Row="2">
                                         <TextBox CharacterCasing="Upper" KeyDown="macEntered" Text="{Binding MAC, UpdateSourceTrigger=Explicit}" LostFocus="BoxT_LostFocus" Name="BoxT"  Width="110" HorizontalAlignment="Left" BorderThickness="0" Margin="0,0,0,2" Background="#3C4149" FontSize="12" Foreground="#9EA3AA" PreviewTextInput="handleTextMAC"/>
@@ -131,7 +145,7 @@
                                         <RowDefinition Height="15" />
                                         <RowDefinition Height="1*" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock Text="{Binding BoardName}" FontSize="20" Foreground="{Binding BoardNameColor}" Grid.Row="0"/>
+                                    <TextBox Style="{StaticResource nameBox}" Text="{Binding BoardName}" FontSize="18" LostFocus="BoxName_LostFocus" GotFocus="BoxName_GotFocus" Foreground="{Binding BoardNameColor}" KeyDown="nameEntered" Width="110" HorizontalAlignment="Left" BorderThickness="0" Background="#3C4149" Grid.Row="0"/>
                                     <ContentControl Grid.Row="1">
                                         <ContentControl.Template>
                                             <ControlTemplate>
