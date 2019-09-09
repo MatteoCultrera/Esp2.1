@@ -210,6 +210,17 @@ namespace EspInterface.Models
             }
         }
 
+        public int boardNum {
+            get
+            {
+                return this._boardNum;
+            }
+            set {
+                if (this._boardNum != value)
+                    this._boardNum = value;
+            }
+        }
+
         public Board(string imgSrc, string name, bool mac, int num)
         {
             this.BoardImgSrc = imgSrc;
