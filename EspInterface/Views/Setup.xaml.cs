@@ -31,7 +31,7 @@ namespace EspInterface.Views
         public static Double offsetBoardExternal = 17.5;
     }
 
-   
+
 
     public partial class Setup : UserControl
     {
@@ -46,7 +46,7 @@ namespace EspInterface.Views
         private int boardPosX, boardPosY;
         private int[,] gridPos;
         private bool isPositioned;
-      
+
 
         public Setup()
         {
@@ -57,8 +57,36 @@ namespace EspInterface.Views
             gridPos = new int[10, 10];
             for (int i = 0; i < 10; i++)
                 for (int j = 0; j < 10; j++)
-                    gridPos[i,j] = 0;
+                    gridPos[i, j] = 0;
+
+            //Subscribe view to events raised by the ViewModel
+            //Now the error connection for the dialog
+
         }
+
+        //Function that subscribes the view to any event from the ViewModel
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            SetupModel sm = (SetupModel)(this.DataContext);
+
+            sm.ErrorConnection += ViewModel_ErrorConnectionDialog;
+        }
+
+        //Function that unsubscribes the view from any event form the ViewModel
+        private void Window_Unloaded(object sender, RoutedEventArgs e)
+        {
+            SetupModel sm = (SetupModel)(this.DataContext);
+
+            sm.ErrorConnection -= ViewModel_ErrorConnectionDialog;
+        }
+
+        private void ViewModel_ErrorConnectionDialog(object sender, ErrorEventArgs args)
+        {
+            DialogErrorConnecting error = new DialogErrorConnecting(args.Message);
+            bool? result = error.ShowDialog();
+            args.Confirmed = result.HasValue ? result.Value : true;
+        }
+
 
         public void AddBoardInGrid(Board realB, int x, int y) {
             if (gridPos[x, y] == 1)
@@ -270,6 +298,11 @@ namespace EspInterface.Views
             SetupModel sm = (SetupModel)(this.DataContext);
             sm.boardConnected(DebugTB.Text);
 
+        }
+
+        private void debugButtonError(object sender, RoutedEventArgs e) {
+            SetupModel sm = (SetupModel)(this.DataContext);
+            sm.errorBoard(DebugTB.Text);
         }
 
         //DragnDrop tries
