@@ -41,7 +41,7 @@
 
     <StackPanel Background="Transparent" Orientation="Vertical" MouseDown="Window_MouseDown">
         <Canvas Background="Transparent" Width="80" Height="39" VerticalAlignment="Center" Panel.ZIndex="2">
-            <Image Source="C:\Users\Matteo\Desktop\Esp2.1\EspInterface\Resources\Icons\ErrorDialog.png" Width="80" Height="80" VerticalAlignment="Center"/>
+            <Image Source="/Resources/Icons/ErrorDialog.png" Width="80" Height="80" VerticalAlignment="Center"/>
         </Canvas>
         <Border CornerRadius="6" BorderBrush="#FF3333" BorderThickness="3" Panel.ZIndex="1" Background="#222528">
             <StackPanel Orientation="Vertical" Background="Transparent" >

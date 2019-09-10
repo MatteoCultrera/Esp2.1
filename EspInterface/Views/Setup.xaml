@@ -5,7 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EspInterface.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="575" d:DesignWidth="620">
+             d:DesignHeight="575" d:DesignWidth="620"
+             Loaded="Window_Loaded"
+             Unloaded="Window_Unloaded">
 	<Canvas Background="#3C4149" x:Name="canvas" MouseLeftButtonUp="CanvasMouseLeftButtonUp" MouseMove="CanvasMouseMove">
         
         
