@@ -272,6 +272,13 @@ namespace EspInterface.Views
 
         }
 
+        private void debugButtonError(object sender, RoutedEventArgs e) {
+            Button butt = sender as Button;
+            DialogErrorConnecting error = new DialogErrorConnecting("Ops, looks like board not connected");
+            error.ShowDialog();
+            MessageBox.Show("OKOK");
+        }
+
         //DragnDrop tries
 
         private Point mousePosition;

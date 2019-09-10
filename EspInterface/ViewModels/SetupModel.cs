@@ -97,6 +97,12 @@ namespace EspInterface.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private ICommand _errorConnectingDialog = null;
+        public ICommand errorConnectingDialog {
+            get { return this._errorConnectingDialog; }
+            set { this._errorConnectingDialog = value; }
+        }
+
         private string _draggingBoardVisibility;
         
         public string draggingBoardVisibility {
@@ -211,6 +217,26 @@ namespace EspInterface.ViewModels
             }
 
         }
+
+        public void errorBoard(string mac) {
+
+            String boardName="";
+
+            foreach (Board b in boardObjs) {
+                if (b.MAC.Equals(mac))
+                {
+                    boardName = b.BoardName;
+                    break;
+                }
+
+            }
+
+            string errorDialog = "Looks like " + boardName + " didn’t manage to connect. Check if the MAC is correct or try moving the board elsewhere";
+            //DialogErrorConnecting error = new DialogErrorConnecting("Ops, looks like board not connected");
+            //error.ShowDialog();
+
+        }
+
         public delegate void ExampleCallback(int[] resArray, int boards, ServerInterop thr); // in order to accept thread returns, we must add this class. do not delete ! 
 
         public static void ResultCallback(int[] resArray, int boards, ServerInterop thr)

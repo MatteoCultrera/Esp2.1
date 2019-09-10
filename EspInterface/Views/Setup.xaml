@@ -246,6 +246,7 @@
         <StackPanel Canvas.Bottom="10" Canvas.Left="10" Orientation="Horizontal">
             <TextBox Name="DebugTB" Width="150" CharacterCasing="Upper"/>
             <Button Width="15" Height="15"  IsEnabled="True" Visibility="Visible" Click="debugButtonClick"/>
+            <Button Width="15" Height="15"  IsEnabled="True" Visibility="Visible"  Background="Red" Click="debugButtonError"/>
         </StackPanel>
         
     </Canvas>
