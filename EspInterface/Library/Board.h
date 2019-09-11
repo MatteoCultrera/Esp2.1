@@ -1,9 +1,6 @@
 #pragma once
-#include <list> 
-#include <iterator> 
-#include <string>
-#include <cstring>
 #include "stdafx.h"
+
 using namespace std;
 
 class Board
