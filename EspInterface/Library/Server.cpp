@@ -1248,6 +1248,7 @@ int AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool &sniffin
 				}
 				else {
 					cout << "Incoming connection from an outsider board" << endl;
+					/* Chiudere la connessione ??? */
 				}
 
 				/* Discriminates a board that can detach from electricity while sniffing. Need to do not receive packets */
