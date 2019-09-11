@@ -97,8 +97,14 @@ namespace EspInterface.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private ICommand _errorConnectingDialog = null;
+        public ICommand errorConnectingDialog {
+            get { return this._errorConnectingDialog; }
+            set { this._errorConnectingDialog = value; }
+        }
+
         private string _draggingBoardVisibility;
-        
+
         public string draggingBoardVisibility {
             get {
                 return this._draggingBoardVisibility;
@@ -116,12 +122,12 @@ namespace EspInterface.ViewModels
         private string _title;
         private string _subtitle;
         private string _numBoards;
-        private int boards;
+        public int boards;
         private int screen;
         private bool _buttonEnabled;
         private ICommand _okButton;
         public int numMac;
-        public List<string> macList= new List<string>();
+        public List<string> macList = new List<string>();
         public ServerInterop thr;
 
         public string textBoxEnabled {
@@ -138,7 +144,7 @@ namespace EspInterface.ViewModels
                 if (screen == 1)
                     return "White";
                 return "#3C4149";
-                
+
             }
         }
         private ObservableCollection<Board> BoardObjs;
@@ -206,13 +212,58 @@ namespace EspInterface.ViewModels
 
             if (boardsConnected == boardObjs.ToArray<Board>().Length) {
                 Title = "All Boards Connected";
-                Subtitle = "";
-                foreach (Board b in BoardObjs) {
-                    b.subtitle = "drag to position";
-                }
+                Subtitle = "Drag them in order into the Grid";
+                boardObjs[0].subtitle = "Drag to position";
             }
 
         }
+
+        public void errorBoard(string mac) {
+
+            String boardName = "";
+
+            foreach (Board b in boardObjs) {
+                if (b.MAC.Equals(mac))
+                {
+                    boardName = b.BoardName;
+                    break;
+                }
+
+            }
+
+            string errorDialog = "Looks like " + boardName + " didn’t manage to connect. Check if the MAC is correct or try moving the board elsewhere";
+
+            var args = new ErrorEventArgs
+            {
+                Message = errorDialog
+            };
+            
+            //Raising event to show dialog in the View
+            OnErrorConnection(args);
+
+            //Checking dialog Response (useless this time since is always yes)
+            if (args.Confirmed)
+            {
+                //TODO: code to return interface to previous state
+
+                screen = 2;
+                foreach (Board b in BoardObjs)
+                {
+                    b.macEditable = true;
+                    //give to the server the board mac
+                    b.connected = false;
+                }
+
+                checkMacs();
+           
+            }
+
+            
+            //DialogErrorConnecting error = new DialogErrorConnecting("Ops, looks like board not connected");
+            //error.ShowDialog();
+
+        }
+
         public delegate void ExampleCallback(int[] resArray, int boards, ServerInterop thr); // in order to accept thread returns, we must add this class. do not delete ! 
 
         public static void ResultCallback(int[] resArray, int boards, ServerInterop thr)
@@ -241,30 +292,43 @@ namespace EspInterface.ViewModels
                     screen = 2;
                     numBoards = "";
                     Title = "Insert Boards MAC";
-                    Subtitle = "";
+                    Subtitle = "You can also change board's names";
                     NotifyPropertyChanged("colorTextBox");
                     NotifyPropertyChanged("textBoxEnabled");
                     ButtonEnabled = false;
-                    for (int i = 1; i <= boards; i++) 
-                        BoardObjs.Add(new Board("/Resources/Icons/Boards/Board"+i+"N.png", "Board " + i.ToString(), false, i));
-
+                    for (int i = 1; i <= boards; i++)
+                        BoardObjs.Add(new Board("/Resources/Icons/Boards/Board" + i + "N.png", "Board " + i.ToString(), false, i));
                     break;
                 case 2:
                     screen = 3;
-                    foreach(Board b in BoardObjs) {
+                    foreach (Board b in BoardObjs) {
                         b.macEditable = false;
                         //give to the server the board mac
                     }
                     Title = "Connecting";
-                    Subtitle="";
+                    Subtitle = "";
                     ButtonEnabled = false;
                     //Start connecting with the server
 
-                    thr = new ServerInterop(new ExampleCallback(ResultCallback), boards, BoardObjs);
+                    //MARTI: il thread viene creato la prima volta ma se torno indietro
+                    //perché una schedina viene rfiutata lo ricrea e blocca l'app
+                    //devi controllare che il thread esista prima di ricrearlo
+
+                    //thr = new ServerInterop(new ExampleCallback(ResultCallback), boards, BoardObjs);
 
 
-                    Thread t = new Thread(new ThreadStart(thr.CheckMacAdddr));
-                    t.Start();
+                    //Thread t = new Thread(new ThreadStart(thr.CheckMacAdddr));
+                    //t.Start();
+                    break;
+                case 3:
+                    string s = "";
+                    foreach (Board b in BoardObjs) {
+
+                        s += b.BoardName + " " + b.posX + " " + b.posY + "\n";
+
+
+                    }
+                    MessageBox.Show(s);
                     break;
 
             }
@@ -277,10 +341,10 @@ namespace EspInterface.ViewModels
                 return this._buttonEnabled;
             }
             set {
-                
-                    this._buttonEnabled = value;
-                    this.NotifyPropertyChanged("ButtonEnabled");
-                
+
+                this._buttonEnabled = value;
+                this.NotifyPropertyChanged("ButtonEnabled");
+
             }
         }
 
@@ -292,11 +356,13 @@ namespace EspInterface.ViewModels
             }
             if (i == BoardObjs.ToArray<Board>().Length) {
                 Title = "All Boards Positioned";
+                Subtitle = "";
                 ButtonEnabled = true;
             }
             else
             {
                 Title = "All Boards Connected";
+                Subtitle = "Drag them in order into the Grid";
                 ButtonEnabled = false;
             }
         }
@@ -314,6 +380,7 @@ namespace EspInterface.ViewModels
                 }
             }
         }
+
         public string Subtitle {
             get {
                 return this._subtitle;
@@ -326,7 +393,7 @@ namespace EspInterface.ViewModels
                 }
             }
         }
-        
+
         public string numBoards {
             get {
                 return this._numBoards;
@@ -341,7 +408,7 @@ namespace EspInterface.ViewModels
                     {
                         boards = x;
                     }
-                    else if(screen == 1)
+                    else if (screen == 1)
                     {
                         boards = 0;
                     }
@@ -358,9 +425,8 @@ namespace EspInterface.ViewModels
 
         }
 
-
         public bool macRepeated(string mac) {
-            foreach(Board b in boardObjs) {
+            foreach (Board b in boardObjs) {
                 if (b.MAC != null)
                 {
                     if (b.MAC.Equals(mac))
@@ -383,15 +449,7 @@ namespace EspInterface.ViewModels
             return false;
         }
 
-        public void StartDragging() {
-            draggingBoardVisibility = "Visible";
-        }
-
-        public void StopDragging() {
-            draggingBoardVisibility = "Hidden";
-        }
-
-        public SetupModel(){
+        public SetupModel() {
             this.screen = 1;
             this.Title = "Insert number of boards:";
             this.Subtitle = "Press ok when done";
@@ -404,8 +462,32 @@ namespace EspInterface.ViewModels
             draggingBoardVisibility = "Collapsed";
         }
 
+        public void dragNext(int i) {
+            BoardObjs[i].subtitle = "Drag to position";
+        }
+
+
+        //Raise Event for Error Dialog
+
+        public event EventHandler<ErrorEventArgs> ErrorConnection;
+
+        protected virtual void OnErrorConnection(ErrorEventArgs args)
+        {
+            ErrorConnection?.Invoke(this, args);
+        }
+
+
+        
 
     }
 
-   
+    public class ErrorEventArgs : EventArgs
+    {
+
+        public string Message { get; set; }
+        public bool Confirmed { get; set; }
+    }
+
+
+
 }
