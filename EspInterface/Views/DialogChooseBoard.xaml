@@ -1,0 +1,134 @@
+﻿<Window x:Class="EspInterface.Views.DialogChooseBoard"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        BorderBrush="Black"
+        BorderThickness="0"
+        Background="Transparent"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EspInterface.Views"
+        mc:Ignorable="d"
+        Title="DialogChooseBoard" SizeToContent="Height" Width="360">
+
+    <Window.Resources>
+
+        <Style TargetType="Button" x:Key="OkButton">
+            <Setter Property="Background" Value="#ff3333" />
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+            <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+            <Setter Property="TextBlock.Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="bord" CornerRadius="6" Background="#ff3333" BorderBrush="#ccc" BorderThickness="0" >
+                            <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bord" Property="Background"  Value="#ff5555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <Style x:Key="{x:Type ListBox}" TargetType="{x:Type ListBox}">
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <ImageBrush Stretch="Fill" ImageSource="/Resources/Icons/backgroundChooseBoard.png"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBox}">
+                        <Border Name="Bd"
+                                 Background="{TemplateBinding Background}"
+                                 BorderBrush="{TemplateBinding BorderBrush}"
+                                 BorderThickness="{TemplateBinding BorderThickness}"
+                                 SnapsToDevicePixels="true"
+                                 Padding="0">
+                            <!--It was 1 -->
+                            <ScrollViewer Padding="{TemplateBinding Padding}" Focusable="false">
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </ScrollViewer>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                    
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Height" Value="62"/>
+            <Setter Property="Margin" Value="0,0,0,0.5"/>
+            <Setter Property="IsEnabled" Value="{Binding unselected}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <StackPanel Orientation="Horizontal" Name="sp">
+                            
+                            <Image Source="{Binding imagePath}" Width="35" Margin="21,0,0,0" VerticalAlignment="Center" ></Image>
+                            <StackPanel Orientation="Vertical" Margin="24,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}" FontSize="20" Foreground="{Binding colorFont}" />
+                                <TextBlock Text="{Binding MAC}" FontSize="12" Foreground="{Binding colorFont}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" TargetName="sp">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="White" Opacity="0.2"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+    </Window.Resources>
+    
+    <Border CornerRadius="16" BorderBrush="#31FFD1" BorderThickness="3" Panel.ZIndex="1" Background="#222528"> 
+        <StackPanel Margin="30,30,30,0">
+            <TextBlock Text="Choose Board" TextAlignment="Left"  FontSize="38" Foreground="White" Margin="0,0,0,20" />
+
+
+            <Grid>
+                <Border x:Name="Border1" CornerRadius="8" Background="#3C4149" BorderThickness="0" />
+                <ListBox Height="186.5" Name="lbBoards" SelectionChanged="listBox1_SelectedIndexChanged"/>
+                <Grid.OpacityMask>
+                    <VisualBrush Visual="{Binding ElementName=Border1}" />
+                </Grid.OpacityMask>
+            </Grid>
+
+            
+
+            <Button Style="{StaticResource OkButton}" Height="25" Width="100" HorizontalAlignment="Right" Margin="0,16,0,16" Click="cancelClicked"> CANCEL</Button>
+
+        </StackPanel>
+    </Border>
+</Window>

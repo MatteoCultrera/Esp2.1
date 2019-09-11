@@ -219,9 +219,7 @@ namespace EspInterface.ViewModels
         }
 
         public void errorBoard(string mac) {
-
             String boardName = "";
-
             foreach (Board b in boardObjs) {
                 if (b.MAC.Equals(mac))
                 {
@@ -230,9 +228,7 @@ namespace EspInterface.ViewModels
                 }
 
             }
-
             string errorDialog = "Looks like " + boardName + " didn’t manage to connect. Check if the MAC is correct or try moving the board elsewhere";
-
             var args = new ErrorEventArgs
             {
                 Message = errorDialog
@@ -460,6 +456,7 @@ namespace EspInterface.ViewModels
             okButton = new RelayCommand(okClick, param => this.ButtonEnabled);
             screen = 1;
             draggingBoardVisibility = "Collapsed";
+            
         }
 
         public void dragNext(int i) {
@@ -475,9 +472,6 @@ namespace EspInterface.ViewModels
         {
             ErrorConnection?.Invoke(this, args);
         }
-
-
-        
 
     }
 

@@ -46,7 +46,7 @@
         <Border CornerRadius="6" BorderBrush="#FF3333" BorderThickness="3" Panel.ZIndex="1" Background="#222528">
             <StackPanel Orientation="Vertical" Background="Transparent" >
 
-                <TextBlock Text="Ops" Margin="0, 54, 0, 0" TextAlignment="Center"  FontSize="48" Foreground="White" />
+                <TextBlock Text="Ops" Margin="0, 37, 0, 0" TextAlignment="Center"  FontSize="48" Foreground="White" />
                 <TextBlock Name="errorText"
                            Margin="32, 18, 32, 0" 
                            Text="Looks like Fede's Board didn't manage to connect. Check if the MAC is correct or try moving the board elsewhere" 
