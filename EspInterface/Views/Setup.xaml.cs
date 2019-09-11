@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -17,6 +18,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using EspInterface.Models;
 using EspInterface.ViewModels;
+
+using System.Diagnostics;
 
 namespace EspInterface.Views
 {
@@ -46,6 +49,7 @@ namespace EspInterface.Views
         private int boardPosX, boardPosY;
         private int[,] gridPos;
         private bool isPositioned;
+        private List<LoadedBoard> loadedBoards;
 
 
         public Setup()
@@ -59,6 +63,29 @@ namespace EspInterface.Views
                 for (int j = 0; j < 10; j++)
                     gridPos[i, j] = 0;
 
+            loadedBoards = new List<LoadedBoard>();
+
+            string boardsFileLocation = "../../Data/SavedBoards/boards.txt";
+
+            if (File.Exists(boardsFileLocation)) {
+                string[] lines = File.ReadAllLines(boardsFileLocation);
+
+                string toPrint = "";
+
+                string[] separator = { "/" };
+
+                foreach(string line in lines)
+                {
+                    string[] NameMAC = line.Split(separator, 2, StringSplitOptions.RemoveEmptyEntries);
+                    loadedBoards.Add(new LoadedBoard(NameMAC[0], NameMAC[1]));
+                }
+
+            }
+            else
+            {
+                Trace.WriteLine("File NOt Existing");
+            }
+
             //Subscribe view to events raised by the ViewModel
             //Now the error connection for the dialog
 
@@ -70,6 +97,8 @@ namespace EspInterface.Views
             SetupModel sm = (SetupModel)(this.DataContext);
 
             sm.ErrorConnection += ViewModel_ErrorConnectionDialog;
+
+            //C:\Users\Matteo\Desktop\Esp2.1\EspInterface\Data\SavedBoards\boards.txt
         }
 
         //Function that unsubscribes the view from any event form the ViewModel
@@ -80,11 +109,35 @@ namespace EspInterface.Views
             sm.ErrorConnection -= ViewModel_ErrorConnectionDialog;
         }
 
-        private void ViewModel_ErrorConnectionDialog(object sender, ErrorEventArgs args)
+        private void ViewModel_ErrorConnectionDialog(object sender,EspInterface.ViewModels.ErrorEventArgs args)
         {
             DialogErrorConnecting error = new DialogErrorConnecting(args.Message);
             bool? result = error.ShowDialog();
             args.Confirmed = result.HasValue ? result.Value : true;
+        }
+
+        private void showPickBoardDialog(object sender, RoutedEventArgs e) {
+
+            SetupModel sm = (SetupModel)(this.DataContext);
+            DialogChooseBoard choose = new DialogChooseBoard(loadedBoards);
+            bool? result = choose.ShowDialog();
+            Board senderBoard = (sender as Button).DataContext as Board;
+            if(result == true)
+            {
+                if (senderBoard.indexLoaded != -1)
+                {
+                    loadedBoards[senderBoard.indexLoaded].selected = false;
+                }
+
+                senderBoard.indexLoaded = loadedBoards.IndexOf(choose.picked);
+                loadedBoards[senderBoard.indexLoaded].selected = true;
+
+                senderBoard.BoardName = choose.picked.Name;
+                senderBoard.MAC = choose.picked.MAC;
+
+                sm.checkMacs();
+            }
+
         }
 
 
@@ -836,7 +889,7 @@ namespace EspInterface.Views
             draggingBoardPositioned = null;
         }
 
-        
+
 
         public class BoardInGrid
         {
@@ -893,9 +946,9 @@ namespace EspInterface.Views
                     Stroke = color
                 };
 
-                
 
-                
+
+
                 Binding sourceX = new Binding("X1");
                 sourceX.Source = boardImage;
 
@@ -907,7 +960,7 @@ namespace EspInterface.Views
                 //roomLine.SetBinding(Line.X1Property, sourceX);
                 //roomLine.SetBinding(Line.Y1Property, sourceY);
 
-                
+
 
                 //roomLine.Visibility = Visibility.Collapsed;
 
@@ -963,7 +1016,7 @@ namespace EspInterface.Views
                 return this.posX;
             }
 
-            public int getY(){
+            public int getY() {
                 return this.posY;
             }
 
@@ -1029,10 +1082,65 @@ namespace EspInterface.Views
             }
 
 
-
         };
 
-        
+    }
+    public class LoadedBoard
+    {
+        private string _name, _MAC;
+        private bool _selected;
+
+        public string imagePath
+        {
+            get
+            {
+                if (!_selected)
+                    return "/Resources/Icons/boardSide.png";
+                else
+                    return "/Resources/Icons/boardSideDisabled.png";
+            }
+        }
+
+        public string colorFont
+        {
+            get
+            {
+                if (!_selected)
+                    return "#FFFFFF";
+                else
+                    return "#9EA3AA";
+            }
+        }
+
+        public bool unselected
+        {
+            get { return !selected; }
+        }
+
+        public string Name
+        {
+            get { return _name;}
+            set { this._name = value; }
+        }
+
+        public string MAC
+        {
+            get { return _MAC; }
+            set { this._MAC = MAC; }
+        }
+
+        public bool selected
+        {
+            get { return this._selected; }
+            set { this._selected = value; }
+        }
+
+        public LoadedBoard(string Name, string MAC)
+        {
+            this._name = Name;
+            this._MAC = MAC;
+        }
+
     }
 }
 

@@ -119,6 +119,65 @@
                 </Setter>
             </Style>
 
+            <Style x:Key="LoadBoardButton" TargetType="Button">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid>
+                                <Ellipse Width="33" Height="33" Name ="elLoad" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="/Resources/Icons/loadBoardDisabled.png"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Setter Property="Fill" TargetName="elLoad">
+                                        <Setter.Value>
+                                            <ImageBrush ImageSource="/Resources/Icons/loadBoard.png"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsEnabled" Value="True"/>
+                                        <Condition Property="IsMouseOver" Value="true"/>
+                                    </MultiTrigger.Conditions>
+                                    <MultiTrigger.EnterActions>
+                                        <StopStoryboard BeginStoryboardName="Shrink"/>
+                                        <BeginStoryboard Name="Growing">
+                                            <Storyboard>
+                                                <DoubleAnimation Duration="0:0:0.100" To="38" Storyboard.TargetProperty="Height" Storyboard.TargetName="elLoad" />
+                                                <DoubleAnimation Duration="0:0:0.100" To="38" Storyboard.TargetProperty="Width" Storyboard.TargetName="elLoad"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </MultiTrigger.EnterActions>
+                                    <MultiTrigger.ExitActions>
+                                        <StopStoryboard BeginStoryboardName="Growing"/>
+                                        <BeginStoryboard Name="Shrink">
+                                            <Storyboard>
+                                                <DoubleAnimation Duration="0:0:0.100" To="33" Storyboard.TargetProperty="Height" Storyboard.TargetName="elLoad" />
+                                                <DoubleAnimation Duration="0:0:0.100" To="33" Storyboard.TargetProperty="Width" Storyboard.TargetName="elLoad"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </MultiTrigger.ExitActions>
+                                </MultiTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsPressed}" Value="true" >
+                                    <Setter Property="Fill" TargetName="elLoad">
+                                        <Setter.Value>
+                                            <ImageBrush ImageSource="/Resources/Icons/loadBoardClicked.png"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
             <Style TargetType="ListBoxItem">
                 <Setter Property="IsEnabled" Value="True"/>
                 <Setter Property="Template">
@@ -172,6 +231,7 @@
                                     </ContentControl>
                                     <TextBlock Text="{Binding subtitle}" FontSize="12" Grid.Row="2" Foreground="#9EA3AA" VerticalAlignment="Top"/>
                                 </Grid>
+                                <Button Visibility="{Binding macEditableVisibility}" Click="showPickBoardDialog" Style="{StaticResource LoadBoardButton}" IsEnabled="{Binding unloaded}"  Width="40" Height="40" Margin="0,0,0,0" VerticalAlignment="Top"/>
                             </StackPanel>
                         </ControlTemplate>
                     </Setter.Value>
@@ -184,9 +244,9 @@
                 <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden"/>
                 <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
-                <Setter Property="Width" Value="180"/>
+                <Setter Property="Width" Value="213"/>
                 <Setter Property="Height" Value="248"/>
-                <Setter Property="Canvas.Left" Value="410"/>
+                <Setter Property="Canvas.Left" Value="377"/>
                 <Setter Property="Canvas.Top" Value="195"/>
                 <Setter Property="Background" Value="#3C4149"/>
                 <Setter Property="BorderThickness" Value="0"/>
@@ -239,7 +299,9 @@
         <ListBox ItemsSource="{Binding boardObjs}" Name="BoardList" MouseMove="ListBox_MouseMove" />
 
 
-        
+
+
+
 
         <!-- <Image Name="drIm"  Source="/Resources/Icons/Boards/BoardN.png" Height="35" Width="35" Visibility="{Binding draggingBoardVisibility}"/> -->
 
