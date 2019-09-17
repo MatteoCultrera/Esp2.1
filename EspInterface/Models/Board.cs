@@ -25,6 +25,20 @@ namespace EspInterface.Models
         public int posX, posY;
         private bool _unloaded;
         private int _indexLoaded;
+        private double _xMeters;
+        private double _yMeters;
+
+        public double xMeters
+        {
+            get { return this._xMeters; }
+            set { this._xMeters = value; }
+        }
+
+        public double yMeters
+        {
+            get { return this._yMeters; }
+            set { this._yMeters = value; }
+        }
 
         public int indexLoaded
         {
@@ -266,6 +280,8 @@ namespace EspInterface.Models
             this._subtitle = "";
             this.unloaded = true;
             this._indexLoaded = -1;
+            this._xMeters = 0;
+            this._yMeters = 0;
         }
 
         public void NotifyPropertyChanged(string propName)
