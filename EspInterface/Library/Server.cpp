@@ -1,12 +1,29 @@
 #include "stdafx.h"
 #include "Server.h"
+#include <stdio.h>
+#include <windows.h>
 
 using namespace std;
 
 int nameCount = 1;
 
-Server::Server() {
+HANDLE smWrite;
+DWORD bytesWritten;
+HANDLE mutCheckMac;
 
+bool WriteSharedMemoryArea(string macToSend,int timeout)
+{
+		smWrite = OpenFileMappingA(FILE_MAP_ALL_ACCESS, TRUE,  "MAC_FOUND");
+		WriteFile(smWrite, macToSend, strlen(macToSend), &bytesWritten, NULL);
+		WriteFile(smWrite, &timeout, sizeof(int), &bytesWritten, NULL);
+		cout << "ho scritto!";
+		CloseHandle(smWrite);
+		return true;
+}
+
+
+
+Server::Server() {
 }
 
 Server::Server(int number)
@@ -100,6 +117,9 @@ int Server::doSetup() {
 	printf("Listening at socket %d...\n", passive_socket);
 
 	return 1;
+
+	/*opening mutex */
+	mutCheckMac = OpenMutexW(MUTEX_ALL_ACCESS, TRUE, "MAC_ADDR_MUTEX");
 }
 
 int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
@@ -702,7 +722,7 @@ Server::~Server()
 
 /* ----------------------------------- NEW ACCEPT ------------------------------------- */
 /* QUESTA SARA' LA ACCEPT FINALE, OVVERO QUANDO AVRO' A DISPOSIZIONE I MAC DELLE SCEHDE */
-int Server::AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool &sniffingFlag, bool &secondFlag) {
+int AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool &sniffingFlag, bool &secondFlag) {
 
 	int connections = 0;		/* Count for the connections */
 	int attempts = 0;			/* Number of attemps to decide when quit the program */
@@ -752,6 +772,9 @@ int Server::AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool 
 			}
 			attempts++;
 			if (attempts == 12) {
+				//take mutex
+				WriteSharedMemoryArea("FF:FF:FF:FF:FF:FF", 1);
+				//release, notify
 				return 0;
 			}
 		}
@@ -791,6 +814,13 @@ int Server::AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool 
 				for (int i = 0; i < NUMBER_ESP; i++) {
 					if (strcmp(boards[i].getMAC().c_str(), MAC.c_str()) == 0) {
 						newBoardFlag = 0;
+						//take mutex
+						if (mutCheckMac.lock())
+						{ 
+							WriteSharedMemoryArea(boards[i].getMAC, 0);
+							//release
+							mutCheckMac.unlock();
+						}
 					}
 				}
 

@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.IO;
+using System.IO.MemoryMappedFiles;
 
 namespace EspInterface.ViewModels
 {
@@ -23,15 +25,71 @@ namespace EspInterface.ViewModels
         private ManagedObject myObj;
         private int boards;
         private ObservableCollection<Board> BoardObjs;
+        private MemoryMappedFile sharedArea;
+        private MemoryMappedViewStream sharedAreaVS;
+        private Mutex checkMac;
+        private String[] vMacFound;
 
-        public ServerInterop(SetupModel.ExampleCallback callbackDelegate, int boards, ObservableCollection<Board> BoardObjs)
+        private struct sharedData 
+        {
+            public string MAC;
+            public int timeout;
+
+            public sharedData(string MAC, int timeout)
+            {
+                this.MAC=MAC;
+                this.timeout = timeout;
+            }
+        }
+
+        sharedData mySharedData; 
+
+        public ServerInterop(int boards, ObservableCollection<Board> BoardObjs)
+        {
+            this.boards = boards;
+            this.BoardObjs = new ObservableCollection<Board>(BoardObjs);
+            myObj = new ManagedObject(boards); //send number of boards
+
+            sharedArea = MemoryMappedFile.CreateNew("MAC_FOUND", sizeof(char)*18 + sizeof(int));  // ho creato la shared memory per passare i mac trovati
+            sharedAreaVS = sharedArea.CreateViewStream();// si apre la sm come se fosse un file(tipo fin o fout, è lo stream)
+            mySharedData = new sharedData("FF:FF:FF:FF:FF:FF", 0);//salvo una istanza di tipo sm
+            checkMac = new Mutex(false, "MAC_ADDR_MUTEX");
+            vMacFound = new String[boards];
+        }
+
+      /*  
+       *  VERSIONE CON CALLBACK(PUò SEMPRE SERVIRE PER DOPO
+       *  public ServerInterop(SetupModel.ExampleCallback callbackDelegate, int boards, ObservableCollection<Board> BoardObjs)
         {
             callback = callbackDelegate;
             this.boards = boards;
             this.BoardObjs = new ObservableCollection<Board>(BoardObjs);
             myObj = new ManagedObject(boards); //send number of boards
-        }
+            sharedArea = MemoryMappedFile.CreateNew("MAC_FOUND", sizeof(char)*12);  // ho creato la shared memory per passare i mac trovati
+            sharedAreaVS = sharedArea.CreateViewStream();// si apre la sm come se fosse un file
+            checkMac = new Mutex(false, "MAC_ADDR_MUTEX");
+        }*/
             //this class and its methods are the ones called by the c# thread in setupModel. The Thread runs all server functions ! 
+
+        
+        public void ReadSharedMemoryArea()
+        {
+            checkMac.WaitOne();
+            sharedAreaVS.Read(Encoding.ASCII.GetBytes(mySharedData.MAC), 0, 18);
+            sharedAreaVS.Read(Encoding.ASCII.GetBytes(mySharedData.timeout.ToString()), 0, 4);
+            checkMac.ReleaseMutex();
+        }
+
+        public String GetMacFound() 
+        {
+            String foundMac = mySharedData.MAC;
+            return foundMac;
+        }
+
+        public int GetTimeoutStatus()
+        {
+            return mySharedData.timeout;//se è 1 c'è stato il timeout
+        }
 
         public void CheckMacAdddr()
         {
