@@ -1,4 +1,4 @@
-﻿<Window x:Class="EspInterface.Views.DialogChooseBoard"
+﻿<Window x:Class="EspInterface.Views.DialogRecapModifications"
         WindowStyle="None"
         WindowStartupLocation="CenterScreen"
         BorderBrush="Black"
@@ -12,12 +12,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EspInterface.Views"
         mc:Ignorable="d"
-        Title="DialogChooseBoard" SizeToContent="Height" Width="360">
+        Title="DialogRecapModifications" SizeToContent="Height" Width="530">
 
     <Window.Resources>
 
-        <Style TargetType="Button" x:Key="OkButton">
-            <Setter Property="Background" Value="#ff3333" />
+        <Style TargetType="Button" x:Key="cancelButton">
             <Setter Property="TextBlock.TextAlignment" Value="Center" />
             <Setter Property="TextBlock.FontWeight" Value="Bold"/>
             <Setter Property="TextBlock.Foreground" Value="White"/>
@@ -37,9 +36,28 @@
             </Setter>
         </Style>
 
+        <Style TargetType="Button" x:Key="okButton">
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+            <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+            <Setter Property="TextBlock.Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="bord" CornerRadius="6" Background="#80c904" BorderBrush="#ccc" BorderThickness="0" >
+                            <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bord" Property="Background"  Value="#b3df68"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <Style x:Key="{x:Type ListBox}" TargetType="{x:Type ListBox}">
-            
+
             <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Background">
@@ -71,15 +89,15 @@
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-                                </Trigger>
+                            </Trigger>
                             <Trigger Property="IsMouseOver"
                                  Value="False">
                                 <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
-                        
+
                     </ControlTemplate>
-                    
+
 
                 </Setter.Value>
             </Setter>
@@ -119,9 +137,9 @@
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
-                </Style> 
+                </Style>
 
-                
+
                 <Style TargetType="RepeatButton">
                     <Setter Property="Template">
                         <Setter.Value>
@@ -184,60 +202,64 @@
             </Style.Resources>
         </Style>
 
-
         <Style TargetType="ListBoxItem">
             <Setter Property="Height" Value="62"/>
-            <Setter Property="Width" Value="300"/>
-            <Setter Property="IsEnabled" Value="{Binding unselected}"/>
+            <Setter Property="Width" Value="470"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <StackPanel Orientation="Horizontal" Name="sp" Width="300">
-                            
-                            <Image Source="{Binding imagePath}" Width="35" Margin="21,0,0,0" VerticalAlignment="Center" ></Image>
-                            <StackPanel Orientation="Vertical" Margin="24,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" FontSize="20" Foreground="{Binding colorFont}" />
-                                <TextBlock Text="{Binding MAC}" FontSize="12" Foreground="{Binding colorFont}"/>
+                        <StackPanel Orientation="Horizontal" Name="sp" Width="470">
+                            <StackPanel Orientation="Horizontal" Width="205" Margin="20, 0, 0, 0">
+                                <Image Source="{Binding oldBoardSrc}" Width="35" VerticalAlignment="Center" ></Image>
+                                <StackPanel Orientation="Vertical" Width="155" Margin="15,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding oldName}" TextTrimming="CharacterEllipsis" Width="135" Margin="0, 0, 20, 0" FontSize="20" Foreground="White" />
+                                    <TextBlock Text="{Binding oldMAC}" FontSize="12" Foreground="#9ea3aa"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Image Width="20" Visibility="{Binding visibilityNew}" Height="20" VerticalAlignment="Center" Source="/Resources/Icons/frontArrow.png"/>
+                            <StackPanel Orientation="Horizontal" Width="205" Margin="20, 0, 0, 0">
+                                <Image Source="{Binding newBoardSrc}" Visibility="{Binding visibilityNew}" Margin="10" Width="35" VerticalAlignment="Center" ></Image>
+                                <StackPanel Orientation="Vertical" Width="155" Margin="15,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding newName}" TextTrimming="CharacterEllipsis" Width="125" Margin="0, 0, 30, 0" FontSize="20" Foreground="White" />
+                                    <TextBlock Text="{Binding newMAC}" FontSize="12" Foreground="#9ea3aa"/>
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True" >
-                                <Setter Property="Background" TargetName="sp">
-                                    <Setter.Value>
-                                        <SolidColorBrush Color="White" Opacity="0.1"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                            
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers></Style.Triggers>
-                
+
         </Style>
 
 
     </Window.Resources>
     
-    <Border CornerRadius="16" BorderBrush="#31FFD1" BorderThickness="3" Panel.ZIndex="1" Background="#222528"> 
-        <StackPanel Margin="30,30,30,0">
-            <TextBlock Text="Choose Board" TextAlignment="Left"  FontSize="38" Foreground="White" Margin="0,0,0,20" />
+    <Border CornerRadius="16" Background="#222528" BorderBrush="#31FFD1" BorderThickness="3">
+        <Grid MouseDown="Window_MouseDown">
+            <StackPanel Orientation="Vertical" Margin="27, 20, 27, 20">
+                <TextBlock Text="Wait" TextAlignment="Left"  FontSize="38" Foreground="White"/>
+                <TextBlock Margin="0, 20, 0, 20" 
+                           Text="The Boards shown below are new or modified. Do you want to save the changes? " 
+                           TextWrapping="Wrap" TextAlignment="Left"
+                           FontSize="14"
+                           Foreground="White"/>
 
+                <Grid>
+                    <Border x:Name="Border1"  Width="470" CornerRadius="16" Background="#3C4149" BorderThickness="0"/>
+                    <ListBox Height="186.5"  Width="470" Name="lbBoards" />
+                    <Grid.OpacityMask>
+                        <VisualBrush Visual="{Binding ElementName=Border1}" />
+                    </Grid.OpacityMask>
+                </Grid>
 
-            <Grid>
-                <Border x:Name="Border1" CornerRadius="8" Background="#3C4149" BorderThickness="0" />
-                <ListBox Height="186.5" Name="lbBoards" SelectionChanged="listBox1_SelectedIndexChanged"/>
-                <Grid.OpacityMask>
-                    <VisualBrush Visual="{Binding ElementName=Border1}" />
-                </Grid.OpacityMask>
-            </Grid>
+                <StackPanel Orientation="Horizontal" Width="470" Margin="0,28.539,0,0" >
+                    <Button Style="{StaticResource cancelButton}" Height="31.614" Width="116.477" Click="btnDialogCancel_Click">DISCARD</Button>
+                    <Button Style="{StaticResource okButton}" Height="31.614" Width="116.477" Margin="237.046, 0, 0, 0" Click="btnDialogOk_Click">SAVE</Button>
+                </StackPanel>
 
-            
+            </StackPanel>
 
-            <Button Style="{StaticResource OkButton}" Height="25" Width="100" HorizontalAlignment="Right" Margin="0,16,0,16" Click="cancelClicked"> CANCEL</Button>
-
-        </StackPanel>
+        </Grid>
     </Border>
 </Window>
