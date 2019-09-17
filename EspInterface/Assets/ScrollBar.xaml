@@ -20,7 +20,8 @@
                             Width="Auto"
                             Height="Auto"
                             Margin="0,5,0,5"
-                            Background="{TemplateBinding Background}" />
+                            Background="{TemplateBinding Background}" 
+                            />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="Tag"
@@ -37,11 +38,12 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
     <Style TargetType="{x:Type ScrollBar}">
         <Setter Property="Stylus.IsFlicksEnabled"
             Value="false" />
         <Setter Property="Foreground"
-            Value="#ADABAB" />
+            Value="Transparent" />
         <Setter Property="Background"
             Value="Transparent" />
         <Setter Property="Width"
@@ -58,10 +60,10 @@
                         <Track x:Name="PART_Track"
                             Grid.Row="0"
                             IsDirectionReversed="true"
-                            Focusable="false">
+                            Focusable="false" >
                             <Track.Thumb>
                                 <Thumb x:Name="Thumb"
-                                    Background="{TemplateBinding Foreground}"
+                                    Background="#ADABAB"
                                     Style="{DynamicResource ScrollBarTrackThumb}" />
                             </Track.Thumb>
                             <Track.IncreaseRepeatButton>
@@ -85,6 +87,15 @@
                             <Setter Value="{DynamicResource ButtonSelectBrush}"
                                 TargetName="Thumb"
                                 Property="Background" />
+                            <Setter Value="0.4" Property="Opacity"/>
+                        </Trigger>
+                        <Trigger SourceName="Thumb"
+                                Property="IsMouseOver"
+                                Value="false">
+                            <Setter Value="{DynamicResource ButtonSelectBrush}"
+                                TargetName="Thumb"
+                                Property="Background" />
+                            <Setter Value="0.2" Property="Opacity"/>
                         </Trigger>
                         <Trigger SourceName="Thumb"
                                 Property="IsDragging"

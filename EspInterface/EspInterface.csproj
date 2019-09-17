@@ -68,6 +68,9 @@
     <Compile Include="Views\DialogErrorConnecting.xaml.cs">
       <DependentUpon>DialogErrorConnecting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\DialogRecapModifications.xaml.cs">
+      <DependentUpon>DialogRecapModifications.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Monitor.xaml.cs">
       <DependentUpon>Monitor.xaml</DependentUpon>
     </Compile>
@@ -98,6 +101,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DialogErrorConnecting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DialogRecapModifications.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -228,6 +235,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons\boardSideDisabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\backgroundModifiedBoards.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\frontArrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\newBoard.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
