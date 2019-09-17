@@ -23,6 +23,14 @@ namespace EspInterface.Models
         private bool _dragging;
         public bool positioned;
         public int posX, posY;
+        private bool _unloaded;
+        private int _indexLoaded;
+
+        public int indexLoaded
+        {
+            get { return _indexLoaded; }
+            set { this._indexLoaded = value; }
+        }
 
 
         public string subtitle {
@@ -34,6 +42,17 @@ namespace EspInterface.Models
                     this._subtitle = value;
                     NotifyPropertyChanged("subtitle");
                 
+            }
+        }
+
+        public bool unloaded {
+            get
+            {
+                return this._unloaded;
+            }
+            set {
+                this._unloaded = value;
+                NotifyPropertyChanged("unloaded");
             }
         }
 
@@ -81,6 +100,18 @@ namespace EspInterface.Models
             }
 
         }
+
+        public string macEditableVisibility
+        {
+            get
+            {
+                if (this.macEditable)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+
+        }
         public bool macEditable {
             get {
                 return this._macEditable;
@@ -90,6 +121,7 @@ namespace EspInterface.Models
                 {
                     this._macEditable = value;
                     NotifyPropertyChanged("macEditable");
+                    NotifyPropertyChanged("macEditableVisibility");
                 }
                
             }
@@ -232,6 +264,8 @@ namespace EspInterface.Models
             this.positioned = false;
             this._dragging = false;
             this._subtitle = "";
+            this.unloaded = true;
+            this._indexLoaded = -1;
         }
 
         public void NotifyPropertyChanged(string propName)

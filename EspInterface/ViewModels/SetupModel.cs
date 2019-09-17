@@ -219,9 +219,7 @@ namespace EspInterface.ViewModels
         }
 
         public void errorBoard(string mac) {
-
             String boardName = "";
-
             foreach (Board b in boardObjs) {
                 if (b.MAC.Equals(mac))
                 {
@@ -230,9 +228,7 @@ namespace EspInterface.ViewModels
                 }
 
             }
-
             string errorDialog = "Looks like " + boardName + " didn’t manage to connect. Check if the MAC is correct or try moving the board elsewhere";
-
             var args = new ErrorEventArgs
             {
                 Message = errorDialog
@@ -253,7 +249,7 @@ namespace EspInterface.ViewModels
                     //give to the server the board mac
                     b.connected = false;
                 }
-
+                screen2?.Invoke(this, null);
                 checkMacs();
            
             }
@@ -298,6 +294,7 @@ namespace EspInterface.ViewModels
                     ButtonEnabled = false;
                     for (int i = 1; i <= boards; i++)
                         BoardObjs.Add(new Board("/Resources/Icons/Boards/Board" + i + "N.png", "Board " + i.ToString(), false, i));
+                    screen2?.Invoke(this, null);
                     break;
                 case 2:
                     screen = 3;
@@ -308,6 +305,7 @@ namespace EspInterface.ViewModels
                     Title = "Connecting";
                     Subtitle = "";
                     ButtonEnabled = false;
+                    screen3?.Invoke(this, null);
                     //Start connecting with the server
 
                     //MARTI: il thread viene creato la prima volta ma se torno indietro
@@ -328,7 +326,24 @@ namespace EspInterface.ViewModels
 
 
                     }
-                    MessageBox.Show(s);
+                    //MessageBox.Show(s);
+                    var args = new ErrorEventArgs
+                    {
+                        Message = ""
+                    };
+                    setupFinished?.Invoke(this, args);
+
+                    if (args.Confirmed)
+                    {
+                        //MessageBox.Show("ok");
+
+                    }
+                    else
+                    {
+                        //MessageBox.Show("no");
+
+                    }
+
                     break;
 
             }
@@ -460,6 +475,7 @@ namespace EspInterface.ViewModels
             okButton = new RelayCommand(okClick, param => this.ButtonEnabled);
             screen = 1;
             draggingBoardVisibility = "Collapsed";
+            
         }
 
         public void dragNext(int i) {
@@ -476,8 +492,10 @@ namespace EspInterface.ViewModels
             ErrorConnection?.Invoke(this, args);
         }
 
+        public event EventHandler<EventArgs> screen3;
+        public event EventHandler<EventArgs> screen2;
+        public event EventHandler<ErrorEventArgs> setupFinished;
 
-        
 
     }
 
