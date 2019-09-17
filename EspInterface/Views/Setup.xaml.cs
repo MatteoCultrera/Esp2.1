@@ -74,7 +74,7 @@ namespace EspInterface.Views
 
                 string[] separator = { "/" };
 
-                foreach(string line in lines)
+                foreach (string line in lines)
                 {
                     string[] NameMAC = line.Split(separator, 2, StringSplitOptions.RemoveEmptyEntries);
                     loadedBoards.Add(new LoadedBoard(NameMAC[0], NameMAC[1]));
@@ -86,9 +86,6 @@ namespace EspInterface.Views
                 Trace.WriteLine("File NOt Existing");
             }
 
-            //Subscribe view to events raised by the ViewModel
-            //Now the error connection for the dialog
-
         }
 
         //Function that subscribes the view to any event from the ViewModel
@@ -97,8 +94,10 @@ namespace EspInterface.Views
             SetupModel sm = (SetupModel)(this.DataContext);
 
             sm.ErrorConnection += ViewModel_ErrorConnectionDialog;
+            sm.screen2 += enlargeList;
+            sm.screen3 += shrinkList;
+            sm.setupFinished += checkModified;
 
-            //C:\Users\Matteo\Desktop\Esp2.1\EspInterface\Data\SavedBoards\boards.txt
         }
 
         //Function that unsubscribes the view from any event form the ViewModel
@@ -107,9 +106,55 @@ namespace EspInterface.Views
             SetupModel sm = (SetupModel)(this.DataContext);
 
             sm.ErrorConnection -= ViewModel_ErrorConnectionDialog;
+            sm.screen2 -= enlargeList;
+            sm.screen3 -= shrinkList;
+            sm.setupFinished -= checkModified;
         }
 
-        private void ViewModel_ErrorConnectionDialog(object sender,EspInterface.ViewModels.ErrorEventArgs args)
+        private void checkModified(object sender, EspInterface.ViewModels.ErrorEventArgs args)
+        {
+            List<NewModifiedBoards> myBoards = new List<NewModifiedBoards>();
+
+            foreach (BoardInGrid b in boardsInGrid) {
+                if (b.posBoard.indexLoaded == -1)
+                {
+                    myBoards.Add(new NewModifiedBoards(b.posBoard));
+                }
+                else if (!loadedBoards[b.posBoard.indexLoaded].Name.Equals(b.posBoard.BoardName) || !loadedBoards[b.posBoard.indexLoaded].MAC.Equals(b.posBoard.MAC))
+                {
+                    myBoards.Add(new NewModifiedBoards(b.posBoard, loadedBoards[b.posBoard.indexLoaded].MAC, loadedBoards[b.posBoard.indexLoaded].Name));
+                }
+            }
+
+
+            if (myBoards.Count == 0)
+            {
+                args.Confirmed = false;
+            }
+            else
+            {
+
+                DialogRecapModifications recap = new DialogRecapModifications(myBoards);
+                bool? result = recap.ShowDialog();
+                args.Confirmed = result.HasValue ? result.Value : false;
+
+            }
+
+
+
+        }
+
+        private void shrinkList(object sender, EventArgs e)
+        {
+            BoardList.Width = 195;
+        }
+
+        private void enlargeList(object sender, EventArgs e)
+        {
+            BoardList.Width = 225;
+        }
+
+        private void ViewModel_ErrorConnectionDialog(object sender, EspInterface.ViewModels.ErrorEventArgs args)
         {
             DialogErrorConnecting error = new DialogErrorConnecting(args.Message);
             bool? result = error.ShowDialog();
@@ -122,7 +167,7 @@ namespace EspInterface.Views
             DialogChooseBoard choose = new DialogChooseBoard(loadedBoards);
             bool? result = choose.ShowDialog();
             Board senderBoard = (sender as Button).DataContext as Board;
-            if(result == true)
+            if (result == true)
             {
                 if (senderBoard.indexLoaded != -1)
                 {
@@ -180,7 +225,7 @@ namespace EspInterface.Views
                 board.roomLine.X2 = Canvas.GetLeft(boardsInGrid[0].getCan()) + Measures.offsetBoardExternal;
                 board.roomLine.Y2 = 575 - Canvas.GetBottom(boardsInGrid[0].getCan()) + Measures.offsetBoardExternal;
             }
-            
+
 
             //MessageBox.Show("Added board: " + board.getBoardName() + " at pos " + board.boardNum+ "\n" +s);
 
@@ -191,7 +236,7 @@ namespace EspInterface.Views
             {
                 Y = Canvas.GetBottom(boardsInGrid[boardNum].getCan()),
                 X = Canvas.GetLeft(boardsInGrid[boardNum].getCan())
-                
+
             };
 
 
@@ -206,7 +251,7 @@ namespace EspInterface.Views
             else
                 return true;
         }
-        
+
         private void handleTextNumBoards(object sender, TextCompositionEventArgs e) {
             Regex regex = new Regex("[^1-9]+");
 
@@ -235,7 +280,7 @@ namespace EspInterface.Views
             Regex regex = new Regex("^[a-fA-F0-9:]*$");
 
             string text = box.GetLineText(0);
-   
+
             if (box.GetLineLength(0) > 16)
             {
                 e.Handled = true;
@@ -245,13 +290,13 @@ namespace EspInterface.Views
             e.Handled = !regex.IsMatch(e.Text);
         }
 
-        private void macEntered (object sender, KeyEventArgs e){
+        private void macEntered(object sender, KeyEventArgs e) {
 
             TextBox box = sender as TextBox;
             Regex rxMacAddress = new Regex(@"^[0-9a-fA-F]{2}(((:[0-9a-fA-F]{2}){5})|((:[0-9a-fA-F]{2}){5}))$");
 
             SetupModel sm = (SetupModel)(this.DataContext);
-            
+
 
             if (e.Key == Key.Return)
             {
@@ -268,7 +313,7 @@ namespace EspInterface.Views
                     sm.checkMacs();
                 }
             }
-           
+
         }
 
         private void nameEntered(object sender, KeyEventArgs e)
@@ -320,7 +365,7 @@ namespace EspInterface.Views
                 Keyboard.ClearFocus();
                 binding.UpdateSource();
             }
-            
+
         }
 
         private void BoxT_LostFocus(object sender, RoutedEventArgs e)
@@ -349,6 +394,10 @@ namespace EspInterface.Views
         private void debugButtonClick(object sender, RoutedEventArgs e) {
             Button butt = sender as Button;
             SetupModel sm = (SetupModel)(this.DataContext);
+            foreach (Board b in sm.boardObjs)
+            {
+                sm.boardConnected(b.MAC);
+            }
             sm.boardConnected(DebugTB.Text);
 
         }
@@ -369,7 +418,7 @@ namespace EspInterface.Views
         }
 
         public void startDragging(object sender, MouseEventArgs e) {
-           
+
             SetupModel sm = (SetupModel)(this.DataContext);
 
             if (!sm.canDrag())
@@ -387,7 +436,7 @@ namespace EspInterface.Views
                 mousePosition = e.GetPosition(canvas);
 
                 Point p1 = canvas.TranslatePoint(new Point(0, 0), Window.GetWindow(canvas));
-                Point p = im.TranslatePoint(new Point(0,0) , Window.GetWindow(im));
+                Point p = im.TranslatePoint(new Point(0, 0), Window.GetWindow(im));
 
                 BitmapImage bitmap = new BitmapImage(new Uri(draggingBoard.BoardImgSrc, UriKind.RelativeOrAbsolute));
 
@@ -405,7 +454,7 @@ namespace EspInterface.Views
                 p.X = p.X - p1.X;
                 p.Y = p.Y - p1.Y;
 
-               
+
                 //Now P stores the initial position of the image
                 initialPosition = p;
 
@@ -423,7 +472,7 @@ namespace EspInterface.Views
 
         private void CanvasMouseMove(object sender, MouseEventArgs e)
         {
-            if (draggingImage!=null && !returningDrag)
+            if (draggingImage != null && !returningDrag)
             {
                 var position = e.GetPosition(canvas);
                 var offset = position - mousePosition;
@@ -434,7 +483,7 @@ namespace EspInterface.Views
                 newPosY = Canvas.GetTop(draggingImage) + offset.Y;
 
                 if (newPosX < 0)
-                    newPosX =  0;
+                    newPosX = 0;
                 if (newPosX > canvas.Width)
                     newPosX = canvas.Width;
                 if (newPosY < 0)
@@ -459,16 +508,16 @@ namespace EspInterface.Views
 
                 }
             }
-            
+
         }
-        
+
         private void CanvasMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Window.GetWindow(this).Activate();
             Window.GetWindow(this).Focus();
             canvas.Focus();
 
-            if (draggingImage!=null)
+            if (draggingImage != null)
             {
                 returningDrag = true;
                 canvas.ReleaseMouseCapture();
@@ -545,7 +594,7 @@ namespace EspInterface.Views
                 }
                 else
                 {
-                     if (!inGrid(Canvas.GetLeft(draggingImage), Canvas.GetTop(draggingImage)))
+                    if (!inGrid(Canvas.GetLeft(draggingImage), Canvas.GetTop(draggingImage)))
                     {
                         DoubleAnimation da1 = new DoubleAnimation()
                         {
@@ -660,7 +709,7 @@ namespace EspInterface.Views
                             {
                                 draggingBoardPositioned.getExternalLine().BeginAnimation(Line.X2Property, linea1Ext);
                                 draggingBoardPositioned.getExternalLine().BeginAnimation(Line.Y2Property, linea2Ext);
-                                
+
                             }
                         }
                         else
@@ -715,7 +764,7 @@ namespace EspInterface.Views
                             draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, linea1);
                             draggingBoardPositioned.roomLine.BeginAnimation(Line.Y1Property, linea2);
                             if (draggingBoardPositioned.hasExternalLine()) {
-                                
+
                                 draggingBoardPositioned.getExternalLine().BeginAnimation(Line.X2Property, linea1Ext);
                                 draggingBoardPositioned.getExternalLine().BeginAnimation(Line.Y2Property, linea2Ext);
 
@@ -728,13 +777,13 @@ namespace EspInterface.Views
 
                 }
 
-                
+
             }
         }
 
         private bool nearestSpotInGrid() {
             double x = Canvas.GetLeft(draggingImage), y = Canvas.GetTop(draggingImage);
-            double posX=55.2, posY=109.8;
+            double posX = 55.2, posY = 109.8;
             double minX = 5000, minY = 5000;
 
 
@@ -751,7 +800,7 @@ namespace EspInterface.Views
                     minX = Math.Abs(x - (55.2 + offset * i));
                 }
             }
-            
+
 
             for (int i = 0; i < 10; i++)
             {
@@ -773,7 +822,7 @@ namespace EspInterface.Views
 
             else return false;
 
-            
+
 
         }
 
@@ -797,10 +846,10 @@ namespace EspInterface.Views
                 AddBoardInGrid(draggingBoard, boardPosX, boardPosY);
             }
             draggingImage = null;
-            
+
         }
 
-   
+
         private void endDragging(Object sender, EventArgs e) {
 
             returningDrag = false;
@@ -812,8 +861,8 @@ namespace EspInterface.Views
                 draggingBoard.subtitle = "drag to position";
             }
             draggingImage = null;
-            
-            
+
+
         }
 
         private void endDraggingPositioned(Object sender, EventArgs e) {
@@ -883,7 +932,7 @@ namespace EspInterface.Views
                     draggingBoardPositioned.getExternalLine().Y2 = 575 - (initialPosY + offset * draggingBoardPositioned.getY()) + Measures.offsetBoardExternal;
 
                 }
-     
+
             }
             draggingImage = null;
             draggingBoardPositioned = null;
@@ -893,7 +942,7 @@ namespace EspInterface.Views
 
         public class BoardInGrid
         {
-            Board posBoard;
+            public Board posBoard;
             int posX, posY;
             public int boardNum;
             Canvas can;
@@ -1085,6 +1134,134 @@ namespace EspInterface.Views
         };
 
     }
+
+    public class NewModifiedBoards{
+        private Board _board;
+        private string _oldName;
+        private string _oldMAC;
+        private bool _isNew;
+
+        public bool isNew
+        {
+            get { return _isNew; }
+            set { this._isNew = value; }
+        }
+
+        public string oldBoardSrc
+        {
+            get
+            {
+                if (this._isNew)
+                {
+                    return "/Resources/Icons/newBoard.png";
+                }
+                else
+                {
+                    return "/Resources/Icons/boardSideDisabled.png";
+                }
+            }
+        }
+
+        public string newBoardSrc
+        {
+            get
+            {
+                if (this._isNew)
+                {
+                    return "";
+                }
+                else
+                {
+                    return "/Resources/Icons/boardSide.png";
+                }
+            }
+        }
+
+        public string oldMAC
+        {
+            get
+            {
+                if (!_isNew)
+                    return _oldMAC;
+                else
+                    return board.MAC;
+            }
+            set { this._oldMAC = value; }
+        }
+
+        public string oldName
+        {
+            get
+            {
+                if (!_isNew)
+                    return this._oldName;
+                else
+                    return board.BoardName;
+            }
+            set { this._oldName = value; }
+        }
+
+        public string newMAC
+        {
+            get
+            {
+                if (!_isNew)
+                    return this.board.MAC;
+                else
+                    return "";
+            }
+        }
+
+        public string newName
+        {
+            get
+            {
+                if (!_isNew)
+                    return this.board.BoardName;
+                else
+                    return "";
+            }
+            
+        }
+
+        public string visibilityNew
+        {
+            get
+            {
+                if (_isNew)
+                {
+                    return "Hidden";
+                }
+                else
+                {
+                    return "Visible";
+                }
+            }
+        }
+
+        public Board board
+        {
+            get { return this._board; }
+            set { this._board = value; }
+        }
+
+        public NewModifiedBoards(Board board, string oldMac, string oldName)
+        {
+            this._board = board;
+            this._oldMAC = oldMac;
+            this._oldName = oldName;
+            this._isNew = false;
+        }
+
+        public NewModifiedBoards(Board board)
+        {
+            this._board = board;
+            this._oldMAC = "";
+            this._oldName = "";
+            this._isNew = true;
+        }
+    }
+
     public class LoadedBoard
     {
         private string _name, _MAC;

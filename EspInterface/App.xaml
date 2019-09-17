@@ -4,10 +4,6 @@
              xmlns:local="clr-namespace:EspInterface"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/Assets/ScrollBar.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+        
     </Application.Resources>
 </Application>
