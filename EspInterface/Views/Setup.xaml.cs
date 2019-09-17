@@ -136,8 +136,44 @@ namespace EspInterface.Views
 
                 DialogRecapModifications recap = new DialogRecapModifications(myBoards);
                 bool? result = recap.ShowDialog();
-                args.Confirmed = result.HasValue ? result.Value : false;
+                if (result.HasValue)
+                {
+                    if(result.Value == true)
+                    {
+                        foreach(NewModifiedBoards b in myBoards)
+                        {
+                            if (b.isNew)
+                            {
+                                loadedBoards.Add(new LoadedBoard(b.oldName, b.oldMAC));
+                            }
+                            else
+                            {
+                                loadedBoards[b.board.indexLoaded].Name = b.newName;
+                                loadedBoards[b.board.indexLoaded].MAC = b.newMAC;
+                            }
+                        }
 
+                        string toSave = "";
+                        foreach(LoadedBoard b in loadedBoards)
+                        {
+                            toSave += b.Name + "/" + b.MAC + Environment.NewLine;
+                        }
+
+                        string boardsFileLocation = "../../Data/SavedBoards/boards.txt";
+
+                        File.WriteAllText(boardsFileLocation, toSave);
+
+                        MessageBox.Show(toSave);
+                    }
+                    else
+                    {
+                        args.Confirmed = false;
+                    }
+                }
+                else
+                {
+                    args.Confirmed = false;
+                }
             }
 
 
