@@ -22,12 +22,19 @@ namespace EspInterface.ViewModels
         public static extern void set_value(IntPtr instance, int value);
 
         [DllImport("Library.dll")]
-        public static extern IntPtr checkMacAddr(IntPtr instance, char[] macAddr, int size);
+        public static extern int checkMacAddr(IntPtr instance);
 
         [DllImport("Library.dll")]
         public static extern int set_board_user(IntPtr instance,char[] macAddr, int posx, int posy);
 
         [DllImport("Library.dll")]
         public static extern void printBoardList(IntPtr instance);
+
+        [DllImport("Library.dll")]
+        public static extern int set_board_toCheck(IntPtr instance, char[]macAddr);
+
+        [DllImport("Library.dll")]
+        public static extern void serverGo(IntPtr instance);
+
     }
 }

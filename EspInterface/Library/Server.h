@@ -21,12 +21,13 @@ class Server
 	int recvPseq(SOCKET s, string MAC, FILE *fd, PacketQueue &pq);
 	int serverLoop(vector<Board> boards, bool& firstFlag, bool& secondFlag, int value, bool& setUpFlag, bool& sniffingFlag, PacketQueue &pq);
 	int recvMAC(vector<Board>(&boards));
-
+	
 public:
 	Server();
 	Server(int number);
 	~Server();
 	int doSetup();
 	int serverGo(PacketQueue &pq, vector<Board>(&boards));
+	int acceptBoard(int x, vector<Board>(&boards));
 };
 

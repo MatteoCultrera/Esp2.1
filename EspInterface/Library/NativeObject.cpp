@@ -21,10 +21,10 @@
 using namespace std;
 
 
-
 NativeObject::NativeObject(int value) : value_(value)
 {
 	counter = 0;
+	counterBoardToCheck = 0;
 	ofstream myfile;
 	myfile.open("example.txt");
 	myfile << "I received this value: " << value_;
@@ -34,11 +34,11 @@ NativeObject::NativeObject(int value) : value_(value)
 
 	/* Try to setup the server until success */ 
 	while (result == 0) {
-		result = server.doSetup();
+		server = new Server(value_); //qui passo al server il NUMBER_ESP dell'interfaccia
+		result = server.doSetup(); //faccio la dosetup, la prossim chiamata al server e la acceptboard, e successivamente la servergo
 		ofstream serverlog;
 		serverlog.open("serverlog.txt");
 		serverlog << result << endl;
-
 	}		
 }
 
@@ -47,37 +47,62 @@ NativeObject::~NativeObject()
 }
 
 int
-NativeObject::get_value() {
+NativeObject::get_value() 
+{
 	return value_;
 }
 
 void
-NativeObject::set_value(int value) {
+NativeObject::set_value(int value) 
+{
 	value_ = value;
 }
 
-int*
-NativeObject::checkMacAddr(char *macAddr, int size) {
+int
+NativeObject::checkMacAddr() 
+{
 	/*Contact server and check addresses*/
+	int result = server.acceptBoard(counterBoardToCheck, boardsVect2);
+	counterBoardToCheck++;
+	return result;
+}
 
-	ofstream myfile, libLog;
-	libLog.open("LibraryLog.txt");
-	myfile.open("MAC_ADDRESSES.txt");
-	int i = 0;
-	vector<string> vect;
 
-	stringstream ss(macAddr);
-	string token;
+int
+NativeObject::set_board_toCheck(char *macAddr) 
+{
+	Board b = Board(macAddr, 0,0);
+	boardsVect2.push_back(b);
+	return 1;
+}
 
-	while (std::getline(ss, token, ',')) {
-		myfile << i << ") " << token << endl;
-		i++;
+int
+NativeObject::set_board_user(char *macAddr, int posx, int posy) 
+{
+	Board b = Board(macAddr, posx, posy);
+	boardsVect.push_back(b);
+	return 1;
+}
+
+void
+NativeObject::serverGo() 
+{
+	server.serverGo(pkt,boardsVect);
+}
+
+void
+NativeObject::printBoardList() 
+{
+	ofstream myfile2;
+	myfile2.open("BOARD_INFO.txt");
+	for (auto v : boardsVect) 
+	{
+		myfile2 << v.getMac() << ", " << v.get_posX() << ", " << v.get_posY() << endl;
 	}
-	
+}
 
-	//server.checkmac address here  
-	return server.checkMac(macAddr,value_);
-	//if checkmac all 1 then server starts
+
+//TODO HERE:
 	/* server launch
 		//creo un vettore di board per il server, con le board appena create
 			std::vector<Board> boards(value_);
@@ -91,30 +116,8 @@ NativeObject::checkMacAddr(char *macAddr, int size) {
 						cout << "Closing the server" << std::endl;
 						*/
 
-	return 0;
-}
-
-
-int
-NativeObject::set_board_user(char *macAddr, int posx, int posy) {
-	Board b = Board(macAddr, posx, posy);
-	list1.push_back(b);
-	return 1;
-}
-
-//TODO HERE:
 //metodo get position finali per l'interfaccia
 //metodo che lancia server 
-
-void
-NativeObject::printBoardList() {
-	ofstream myfile2;
-	myfile2.open("BOARD_INFO.txt");
-	for (auto v : list1) {
-		myfile2 << v.getMac() << ", " << v.get_posX() << ", " << v.get_posY() << endl;
-	}
-}
-
 
 
 
