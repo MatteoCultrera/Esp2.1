@@ -50,6 +50,7 @@ namespace EspInterface.Views
         private int[,] gridPos;
         private bool isPositioned;
         private List<LoadedBoard> loadedBoards;
+        private double scaleFactorMeters;
 
 
         public Setup()
@@ -64,6 +65,9 @@ namespace EspInterface.Views
                     gridPos[i, j] = 0;
 
             loadedBoards = new List<LoadedBoard>();
+
+            //We set the scale factor to the default value 1
+            scaleFactorMeters = 1 / 264.5;
 
             string boardsFileLocation = "../../Data/SavedBoards/boards.txt";
 
@@ -97,6 +101,9 @@ namespace EspInterface.Views
             sm.screen2 += enlargeList;
             sm.screen3 += shrinkList;
             sm.setupFinished += checkModified;
+
+            sliderRoom.Minimum = 1;
+            sliderRoom.Maximum = 20;
 
         }
 
@@ -221,11 +228,30 @@ namespace EspInterface.Views
 
         }
 
+        private void slider_updateFactor(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+            // Xdist_pix : 264.5 = XdistMeters : sliderValue
+            //we need to find XdistMeters, which is
+            // XdistMeters = Xdist_pix * sliderValue/264.5 so the factor will be sliderValue/264.5
+            //Both for x and y
+
+            scaleFactorMeters = sliderRoom.Value / 264.5;
+
+            tbTopLabel.Text = sliderRoom.Value + " m";
+
+            foreach(BoardInGrid b in boardsInGrid)
+            {
+                setMetersStart(b);
+            }
+
+        }
+
         public void setMeters(BoardInGrid b, Image toTrack)
         {
             //This works only with getTop, so we must subtract the canvas height
-            b.posBoard.xMeters = Canvas.GetLeft(toTrack) - 55.2;
-            b.posBoard.yMeters = (575 - Canvas.GetTop(toTrack)) - 110.3;
+            b.posBoard.xMeters = (Canvas.GetLeft(toTrack) - 55.2) * scaleFactorMeters;
+            b.posBoard.yMeters = ((575 - Canvas.GetTop(toTrack)) - 110.3) * scaleFactorMeters;
 
             b.posBoard.subtitle = string.Format("x: {0,7:##0.00} m    y: {1,7:##0.00} m", b.posBoard.xMeters, b.posBoard.yMeters);
 
@@ -234,8 +260,8 @@ namespace EspInterface.Views
 
         public void setMetersStart(BoardInGrid b)
         {
-            b.posBoard.xMeters = Canvas.GetLeft(b.getCan()) - 55.2;
-            b.posBoard.yMeters = Canvas.GetBottom(b.getCan()) - 110.3;
+            b.posBoard.xMeters = (Canvas.GetLeft(b.getCan()) - 55.2) * scaleFactorMeters;
+            b.posBoard.yMeters = (Canvas.GetBottom(b.getCan()) - 110.3) * scaleFactorMeters;
 
             b.posBoard.subtitle = string.Format("x: {0,7:##0.00} m    y: {1,7:##0.00} m", b.posBoard.xMeters, b.posBoard.yMeters);
 
