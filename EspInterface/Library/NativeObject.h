@@ -22,8 +22,8 @@ public:
 	//list<Board> list1; delete if vector works
 	vector<Board> boardsVect;  // vector containing final positions of all boards truly connected
 	vector<Board> boardsVect2; //the one we use for the CheckMacAddress, posx and posy of all boards is 0 here
-	PacketQueue pkt;
-	Server server;
+	PacketQueue* pkt;
+	Server* server;
 
 private:
 	int counter;

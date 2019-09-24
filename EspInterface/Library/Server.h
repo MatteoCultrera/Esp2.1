@@ -2,7 +2,6 @@
 #include "PacketQueue.h"
 #include "Board.h"
 #include "Packet.h"
-#include "NativeObject.h"
 
 class Server
 {

@@ -35,7 +35,8 @@ NativeObject::NativeObject(int value) : value_(value)
 	/* Try to setup the server until success */ 
 	while (result == 0) {
 		server = new Server(value_); //qui passo al server il NUMBER_ESP dell'interfaccia
-		result = server.doSetup(); //faccio la dosetup, la prossim chiamata al server e la acceptboard, e successivamente la servergo
+		pkt = new PacketQueue();
+		result = server->doSetup(); //faccio la dosetup, la prossim chiamata al server e la acceptboard, e successivamente la servergo
 		ofstream serverlog;
 		serverlog.open("serverlog.txt");
 		serverlog << result << endl;
@@ -62,7 +63,7 @@ int
 NativeObject::checkMacAddr() 
 {
 	/*Contact server and check addresses*/
-	int result = server.acceptBoard(counterBoardToCheck, boardsVect2);
+	int result = server->acceptBoard(counterBoardToCheck, boardsVect2);
 	counterBoardToCheck++;
 	return result;
 }
@@ -87,7 +88,7 @@ NativeObject::set_board_user(char *macAddr, int posx, int posy)
 void
 NativeObject::serverGo() 
 {
-	server.serverGo(pkt,boardsVect);
+	server->serverGo(*pkt,boardsVect);
 }
 
 void

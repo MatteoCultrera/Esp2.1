@@ -31,7 +31,7 @@ namespace EspInterface.ViewModels
         public static extern void printBoardList(IntPtr instance);
 
         [DllImport("Library.dll")]
-        public static extern int set_board_toCheck(IntPtr instance, char[]macAddr);
+        public static extern int set_board_toCheck(IntPtr instance, char[] macAddr);
 
         [DllImport("Library.dll")]
         public static extern void serverGo(IntPtr instance);
