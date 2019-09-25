@@ -44,12 +44,13 @@ namespace EspInterface.Views
         private Point initialPosition;
         private Image draggingImage;
         private List<BoardInGrid> boardsInGrid;
-        private static double initialPosX = 55.2, initialPosY = 109.3;
-        private static double offset = 29.4;
+        private static double initialPosX = 55.2, initialPosY = 110.3;
+        private static double offset = 26.45;
         private int boardPosX, boardPosY;
         private int[,] gridPos;
         private bool isPositioned;
         private List<LoadedBoard> loadedBoards;
+        private double scaleFactorMeters;
 
 
         public Setup()
@@ -58,12 +59,15 @@ namespace EspInterface.Views
             returningDrag = false;
             draggingImage = null;
             boardsInGrid = new List<BoardInGrid>();
-            gridPos = new int[10, 10];
-            for (int i = 0; i < 10; i++)
-                for (int j = 0; j < 10; j++)
+            gridPos = new int[11, 11];
+            for (int i = 0; i <= 10; i++)
+                for (int j = 0; j <= 10; j++)
                     gridPos[i, j] = 0;
 
             loadedBoards = new List<LoadedBoard>();
+
+            //We set the scale factor to the default value 1
+            scaleFactorMeters = 1 / 264.5;
 
             string boardsFileLocation = "../../Data/SavedBoards/boards.txt";
 
@@ -97,6 +101,9 @@ namespace EspInterface.Views
             sm.screen2 += enlargeList;
             sm.screen3 += shrinkList;
             sm.setupFinished += checkModified;
+
+            sliderRoom.Minimum = 1;
+            sliderRoom.Maximum = 20;
 
         }
 
@@ -221,12 +228,51 @@ namespace EspInterface.Views
 
         }
 
+        private void slider_updateFactor(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+            // Xdist_pix : 264.5 = XdistMeters : sliderValue
+            //we need to find XdistMeters, which is
+            // XdistMeters = Xdist_pix * sliderValue/264.5 so the factor will be sliderValue/264.5
+            //Both for x and y
+
+            scaleFactorMeters = sliderRoom.Value / 264.5;
+
+            tbTopLabel.Text = sliderRoom.Value + " m";
+
+            foreach(BoardInGrid b in boardsInGrid)
+            {
+                setMetersStart(b);
+            }
+
+        }
+
+        public void setMeters(BoardInGrid b, Image toTrack)
+        {
+            //This works only with getTop, so we must subtract the canvas height
+            b.posBoard.xMeters = (Canvas.GetLeft(toTrack) - 55.2) * scaleFactorMeters;
+            b.posBoard.yMeters = ((575 - Canvas.GetTop(toTrack)) - 110.3) * scaleFactorMeters;
+
+            b.posBoard.subtitle = string.Format("x: {0,7:##0.00} m    y: {1,7:##0.00} m", b.posBoard.xMeters, b.posBoard.yMeters);
+
+            Debug.WriteLine("setMeters: " + b.posBoard.xMeters + " " + b.posBoard.yMeters);
+        }
+
+        public void setMetersStart(BoardInGrid b)
+        {
+            b.posBoard.xMeters = (Canvas.GetLeft(b.getCan()) - 55.2) * scaleFactorMeters;
+            b.posBoard.yMeters = (Canvas.GetBottom(b.getCan()) - 110.3) * scaleFactorMeters;
+
+            b.posBoard.subtitle = string.Format("x: {0,7:##0.00} m    y: {1,7:##0.00} m", b.posBoard.xMeters, b.posBoard.yMeters);
+
+            Debug.WriteLine("setMeters: " + b.posBoard.xMeters + " " + b.posBoard.yMeters);
+        }
 
         public void AddBoardInGrid(Board realB, int x, int y) {
             if (gridPos[x, y] == 1)
                 return;
 
-            if (x > 9 || y > 9 || x < 0 || y < 0)
+            if (x > 10 || y > 10 || x < 0 || y < 0)
                 return;
             BoardInGrid board = new BoardInGrid(canvas, realB, x, y, realB.BoardImgSrc, this, boardsInGrid.Count());
             canvas.Children.Add(board.getCan());
@@ -236,6 +282,10 @@ namespace EspInterface.Views
 
             board.roomLine.X1 = initialPosX + offset * x + Measures.offsetBoard;
             board.roomLine.Y1 = 575 - (initialPosY + offset * y) + Measures.offsetBoard;
+
+            //Todo: add right meters to the board
+            setMetersStart(board);
+       
             boardsInGrid.Add(board);
             gridPos[x, y] = 1;
 
@@ -508,6 +558,7 @@ namespace EspInterface.Views
 
         private void CanvasMouseMove(object sender, MouseEventArgs e)
         {
+            
             if (draggingImage != null && !returningDrag)
             {
                 var position = e.GetPosition(canvas);
@@ -541,6 +592,8 @@ namespace EspInterface.Views
                         draggingBoardPositioned.getExternalLine().X2 = newPosX + Measures.offsetBoardExternal;
                         draggingBoardPositioned.getExternalLine().Y2 = newPosY + Measures.offsetBoardExternal;
                     }
+
+                    setMeters(draggingBoardPositioned, draggingImage);
 
                 }
             }
@@ -675,8 +728,7 @@ namespace EspInterface.Views
                             Duration = new System.Windows.Duration(TimeSpan.FromSeconds(0.2)),
                         };
 
-                        da1.Completed += new EventHandler(endDraggingPositioned);
-
+                        da1.Completed += new EventHandler(endDraggingPositioned); 
                         draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
                         draggingImage.BeginAnimation(Canvas.TopProperty, da2);
                         draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, linea1);
@@ -794,7 +846,6 @@ namespace EspInterface.Views
                             };
 
                             da1.Completed += new EventHandler(endDraggingPositioned);
-
                             draggingImage.BeginAnimation(Canvas.LeftProperty, da1);
                             draggingImage.BeginAnimation(Canvas.TopProperty, da2);
                             draggingBoardPositioned.roomLine.BeginAnimation(Line.X1Property, linea1);
@@ -819,7 +870,7 @@ namespace EspInterface.Views
 
         private bool nearestSpotInGrid() {
             double x = Canvas.GetLeft(draggingImage), y = Canvas.GetTop(draggingImage);
-            double posX = 55.2, posY = 109.8;
+            double posX = 55.2, posY = 109.30;
             double minX = 5000, minY = 5000;
 
 
@@ -828,7 +879,7 @@ namespace EspInterface.Views
             if (y > 575 - 109.8)
                 y = 575 - 109.8;
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i <= 10; i++) {
                 if (Math.Abs(x - (55.2 + offset * i)) < minX)
                 {
                     boardPosX = i;
@@ -838,7 +889,7 @@ namespace EspInterface.Views
             }
 
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i <= 10; i++)
             {
                 if (Math.Abs(y - (575 - 109.8 - offset * i)) < minY)
                 {
@@ -925,6 +976,8 @@ namespace EspInterface.Views
                     draggingBoardPositioned.getExternalLine().Y2 = 575 - (initialPosY + offset * draggingBoardPositioned.getY()) + Measures.offsetBoardExternal;
                 }
 
+                setMetersStart(draggingBoardPositioned);
+
             }
 
             draggingImage = null;
@@ -968,6 +1021,8 @@ namespace EspInterface.Views
                     draggingBoardPositioned.getExternalLine().Y2 = 575 - (initialPosY + offset * draggingBoardPositioned.getY()) + Measures.offsetBoardExternal;
 
                 }
+
+                setMetersStart(draggingBoardPositioned);
 
             }
             draggingImage = null;

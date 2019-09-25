@@ -1,12 +1,32 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
 #include "Server.h"
+#include <stdio.h>
+#include <windows.h>
+#include <mutex>
 
 using namespace std;
 
 int nameCount = 1;
+int NUMBER_ESP;
+
+HANDLE smWrite;
+DWORD bytesWritten;
+HANDLE mutCheckMac;
+
+bool WriteSharedMemoryArea(string macToSend,int timeout)
+{
+		smWrite = OpenFileMappingA(FILE_MAP_ALL_ACCESS, TRUE,  "MAC_FOUND");
+		WriteFile(smWrite, &macToSend, sizeof(&macToSend), &bytesWritten, NULL);
+		WriteFile(smWrite, &timeout, sizeof(int), &bytesWritten, NULL);
+		cout << "ho scritto!";
+		CloseHandle(smWrite);
+		return true;
+}
+
+
 
 Server::Server() {
-
 }
 
 Server::Server(int number)
@@ -100,6 +120,9 @@ int Server::doSetup() {
 	printf("Listening at socket %d...\n", passive_socket);
 
 	return 1;
+
+	/*opening mutex */
+	mutCheckMac =  OpenMutexA(MUTEX_ALL_ACCESS, TRUE, "MAC_ADDR_MUTEX");
 }
 
 int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
@@ -702,7 +725,7 @@ Server::~Server()
 
 /* ----------------------------------- NEW ACCEPT ------------------------------------- */
 /* QUESTA SARA' LA ACCEPT FINALE, OVVERO QUANDO AVRO' A DISPOSIZIONE I MAC DELLE SCEHDE */
-int Server::AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool &sniffingFlag, bool &secondFlag) {
+int AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool &sniffingFlag, bool &secondFlag) {
 
 	int connections = 0;		/* Count for the connections */
 	int attempts = 0;			/* Number of attemps to decide when quit the program */
@@ -751,7 +774,9 @@ int Server::AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool 
 				countTimeout--;
 			}
 			attempts++;
-			if (attempts == 12) {
+			//fai sapere a interfaccia che hai finito di controllare se ci sono schedine
+			if (attempts == 12) 
+			{			
 				return 0;
 			}
 		}
@@ -788,15 +813,25 @@ int Server::AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool 
 				string MAC(buffer);
 
 				/* Check if the connection is not coming from an already saved board */
-				for (int i = 0; i < NUMBER_ESP; i++) {
-					if (strcmp(boards[i].getMAC().c_str(), MAC.c_str()) == 0) {
+				for (int i = 0; i < NUMBER_ESP; i++)
+				{
+					if (strcmp(boards[i].getMAC().c_str(), MAC.c_str()) == 0) 
+					{
 						newBoardFlag = 0;
+						if(secondFlag)
+						{
+						//take mutex
+						//WaitForSingleObject(mutCheckMac, INFINITE);
+						//WriteSharedMemoryArea(boards[i].getMAC, 0);
+						//release
+						//ReleaseMutex(mutCheckMac);
+						}
 					}
 				}
-
+				
 				/*		Save infos of board accepted	*/
 				if (!newBoardFlag) {
-					showAddr("New connection accepted from: ", &caddr, MAC);
+					//showAddr("New connection accepted from: ", &caddr, MAC);
 					boards[connections].setSocket(client_socket);
 					boards[connections].setAddress(caddr.sin_addr.s_addr);
 					connections++;
@@ -823,8 +858,104 @@ int Server::AcceptConnectionss(vector<Board>(&boards), int passive_socket, bool 
 		}
 	}
 
+	if (secondFlag)
+	{
+		//chiudi il mutex mandando un ultimo mac errato e settando timeout a 1
+		WaitForSingleObject(mutCheckMac, INFINITE);
+		WriteSharedMemoryArea("FF:FF:FF:FF:FF:FF", 1);
+		//release
+		ReleaseMutex(mutCheckMac);
+	}
 	cout << "Server has accepted " << NUMBER_ESP << " connections!" << endl;
 
 	return result;
 }
 
+
+
+int Server::acceptBoard(int x,vector<Board>(&boards)) {
+
+	int attempts = 0;									/* Number of attemps to decide when quit the program */
+	int client_socket;
+	struct sockaddr_in caddr;							/* Struct for client address */
+	int caddr_length = sizeof(struct sockaddr_in);
+	bool found = false;
+	int result = -1;
+
+	/* Timeout structure */
+	fd_set sset;
+	struct timeval tval;
+	FD_ZERO(&sset);
+	FD_SET(passive_socket, &sset);
+	tval.tv_sec = 5;
+	tval.tv_usec = 0;
+
+	while (!found) {
+
+		int nread = select(FD_SETSIZE, &sset, NULL, NULL, &tval);
+
+		if (nread > 0) {
+			client_socket = accept(passive_socket, (struct sockaddr*)&caddr, &caddr_length);
+		}
+		else {
+			cout << "Accept fail within " << tval.tv_sec << " seconds" << endl;
+			client_socket = 0;
+			attempts++;
+			if (attempts == 12) {
+
+				cout << "Maximum attempts reached!" << endl << "Shutting down the server...." << endl;
+				return -1;
+			}
+		}
+
+		if (client_socket == INVALID_SOCKET) {
+			cout << "Accept failed with error: " << WSAGetLastError() << endl;
+		}
+		else if (client_socket > 0) {	/* Connection accepted */
+
+			int errorFlag = 0;
+
+			/* Timeout for the receive */
+			int tv = 5000;
+			setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, (char*)tv, sizeof(tv));
+
+			/* Receive immediatly the client MAC */
+			int cread;
+			char buffer[18];
+			cread = recv(client_socket, buffer, 18, 0);
+			if (cread != 18) {
+				cout << "MAC not received. Error: " << WSAGetLastError() << endl;
+				closesocket(client_socket);
+				errorFlag = 1;
+			}
+			else {
+				cout << "MAC received " << buffer << endl;
+				errorFlag = 0;
+
+				//TODO decide what to do (while, exit and restart...) 
+				closesocket(client_socket);
+			}
+
+			/* If the reading of the MAC address has been done succesfully */
+			if (!errorFlag) {
+
+				string MAC(buffer);
+
+				for (int i = 0; i < NUMBER_ESP; i++)
+				{
+					if (strcmp(boards[x].getMAC().c_str(), MAC.c_str()) == 0)
+					{
+
+						showAddr("New connection accepted from: ", &caddr, MAC);
+						boards[x].setSocket(client_socket);
+						boards[x].setAddress(caddr.sin_addr.s_addr);
+						result = x;
+						found = true;
+					}
+				}
+			}
+		}
+	}
+
+	return result;
+}

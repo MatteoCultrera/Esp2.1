@@ -71,5 +71,8 @@
     <ClCompile Include="..\EspInterface\Library\Trilateration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\EspInterface\Library\PacketQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
