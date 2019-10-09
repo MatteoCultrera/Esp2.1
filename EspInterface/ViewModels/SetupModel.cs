@@ -242,8 +242,6 @@ namespace EspInterface.ViewModels
             //Checking dialog Response (useless this time since is always yes)
             if (args.Confirmed)
             {
-                //TODO: code to return interface to previous state
-
                 screen = 2;
                 foreach (Board b in BoardObjs)
                 {
@@ -282,8 +280,9 @@ namespace EspInterface.ViewModels
                 Thread t = new Thread(new ThreadStart(thr.CreateSetBoard));
                 t.Start();
             }
-        }
-*/
+        }*/
+
+
         private void okClick(object sender)
         {
             switch (screen) {
@@ -310,8 +309,21 @@ namespace EspInterface.ViewModels
                     ButtonEnabled = false;
                     screen3?.Invoke(this, null);
                     //Start connecting with the server
-                    
-                    thr = new ServerInterop(boards, BoardObjs);//nel costruttore del serverInterop setto il costruttore del server e lancio server.dosetup()
+
+
+                    //nel costruttore del serverInterop setto il costruttore del server e lancio server.dosetup()
+                    if(thr == null)
+                        thr = new ServerInterop(boards, BoardObjs, this);
+                 
+                    Thread t1 = new Thread(thr.connectBoards);
+
+                    if (t1.IsAlive)
+                    {
+                        t1.Abort();
+                    }
+
+                    t1.Start();
+
 
                     //before launching the server thread we check if it already exists
                     /*if (t != null && !t.IsAlive)
@@ -325,7 +337,8 @@ namespace EspInterface.ViewModels
                     }
                     else
                         Debug.WriteLine("t already running!");
-                    */
+                    
+
                     
                     foreach (Board b in BoardObjs)
                     {
@@ -346,6 +359,7 @@ namespace EspInterface.ViewModels
                             errorBoard(b.MAC);
                         }
                     }
+                    */
                     break;
 
                 case 3:
@@ -532,7 +546,6 @@ namespace EspInterface.ViewModels
             okButton = new RelayCommand(okClick, param => this.ButtonEnabled);
             screen = 1;
             draggingBoardVisibility = "Collapsed";
-            
         }
 
         public void dragNext(int i) {
