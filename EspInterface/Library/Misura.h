@@ -17,7 +17,6 @@ public:
 
 	double getRssi();
 	double getDistanza();
-	double getRssi();
 	const char* getMACaddrScheda();
 	Board* getSchedaPtr();
 

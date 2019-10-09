@@ -79,11 +79,11 @@ NativeObject::getDevices()
 int
 NativeObject::set_board_toCheck(char *macAddr) 
 {
-	cout << "macAddr len set board to check = " << strlen(macAddr) << endl;
+	//cout << "macAddr len set board to check = " << strlen(macAddr) << endl;
 	char cleanMac[18];
 	strncpy_s(cleanMac, macAddr, 17);
 	cleanMac[17] = '\0';
-	cout << "macAddr was: " << macAddr << "and now is: " << cleanMac << endl;
+	//cout << "macAddr was: " << macAddr << "and now is: " << cleanMac << endl;
 	Board b = Board(cleanMac, 0,0);
 	boardsVect2.push_back(b);
 	return 1;
@@ -93,20 +93,20 @@ int
 NativeObject::set_board_user(char *macAddr, int posx, int posy) 
 {
  //cerca in vettore 2 lo stesso mac addr inserito qui. una volta che lo trovi, copiati il suo valore di s e adr in board b che pushi nel vect1
-	cout << "macAddr len set board user = " << strlen(macAddr) << endl;
+	//cout << "macAddr len set board user = " << strlen(macAddr) << endl;
 	char cleanMac[18];
 	strncpy_s(cleanMac, macAddr, 17);
 	cleanMac[17] = '\0';
 	Board bNew = Board(cleanMac, posx, posy);
-	cout << "I want to update board with address: " << cleanMac << endl;
+	//cout << "I want to update board with address: " << cleanMac << endl;
 	for (Board bOld : boardsVect2)
 	{
-		cout << bOld.getMAC()<< " " << bOld.getSocket() << " " << bOld.getAddress() << endl;
+		//cout << bOld.getMAC()<< " " << bOld.getSocket() << " " << bOld.getAddress() << endl;
 		if (bOld.getMAC().compare(cleanMac) == 0)
 		{
 			bNew.setSocket(bOld.getSocket());
 			bNew.setAddress(bOld.getAddress());
-			cout << "nuova board" << endl << "MAC: " << bNew.getMAC() << endl << "SOCKET: " << bNew.getSocket() << endl << "ADDRESS: " << " " << bNew.getAddress() << endl;
+			//cout << "nuova board" << endl << "MAC: " << bNew.getMAC() << endl << "SOCKET: " << bNew.getSocket() << endl << "ADDRESS: " << " " << bNew.getAddress() << endl;
 		}
 	}
 	boardsVect.push_back(bNew);

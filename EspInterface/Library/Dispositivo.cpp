@@ -92,7 +92,9 @@ void Dispositivo::calcolaCoordinate()
 
 Misura Dispositivo::getMisura() 
 {
-	return 
+	//TODO modificare
+	Misura m;
+	return m;
 }
 
 int Dispositivo::getNumMisure()

@@ -21,9 +21,6 @@
     <ClInclude Include="..\EspInterface\Library\Packet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\EspInterface\Library\Server.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\EspInterface\Library\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -43,6 +40,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\EspInterface\Library\Trilateration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EspInterface\Library\Server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

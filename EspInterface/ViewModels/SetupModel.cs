@@ -373,8 +373,8 @@ namespace EspInterface.ViewModels
                     //ora che le schedine sono connesse e ho inserito le posizioni, lancio t2.serverGo()
                     if (t2 == null)
                     {
-                            t2 = new Thread(new ThreadStart(thr.ServerGo));
-                            t2.Start();
+                           t2 = new Thread(new ThreadStart(thr.ServerGo));
+                           t2.Start();
                             Debug.WriteLine("t2 created and started");
                     }
                     else

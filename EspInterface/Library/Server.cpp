@@ -31,8 +31,9 @@ bool WriteSharedMemoryArea(string macToSend,int timeout)
 		return true;
 }
 
-void setTrilateration(vector<Board>*boards)
+void setTrilateration(vector<Board>boards)
 {
+	//TODO controllare il caso in cui boards sia nullo 
 
 	Trilateration tr= Trilateration(boards);
 	vector<Dispositivo>* tmpDevicesFound;
@@ -176,16 +177,17 @@ int Server::doSetup() {
 
 
 int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
-	cout << "entering serverGo" << endl;
+	//cout << "entering serverGo" << endl;
 	
 	/*inizio il set della trilaterazione*/
 	thread t1(setTrilateration, boards);
 	
-	for (auto v : boards)
+	/*for (auto v : boards)
 	{
 		v.printInfo();
 		cout  << " " << v.getSocket() << " "<<  v.getAddress() << endl;
-	}
+	}*/
+
 	int acceptRes = 1, value = 0, serverRes;
 
 	/* firstFlag: determines the entrance for receiving packets */
@@ -212,7 +214,7 @@ int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
 
 			serverRes = serverLoop(boards, firstFlag, secondFlag, value, setUpFlag, sniffingFlag, pq);
 			if (serverRes > 0) {
-				cout << "value = " << serverRes << endl;
+				cout << "value =  " << serverRes << endl;
 				value = serverRes;
 			}
 
@@ -225,7 +227,7 @@ int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
 }
 
 int Server::serverLoop(vector<Board>boards, bool& firstFlag, bool& secondFlag, int value, bool& setUpFlag, bool& sniffingFlag, PacketQueue &pq) {
-	cout << "entering serverLoop" << endl;
+	//cout << "entering serverLoop" << endl;
 	int sendRes, recvRes;
 
 	/* Avoids the recv Packet at the first iteration */
@@ -305,12 +307,7 @@ int Server::serverLoop(vector<Board>boards, bool& firstFlag, bool& secondFlag, i
 /* I have to send only an ACK so i don't need to do it concurrently */
 /*				If value=1 send OK, if value=0 send NO				*/
 int Server::sendAck(vector<Board>boards, int value) {
-	cout << "entering sendAck" << endl;
-	for (auto v : boards)
-	{
-		v.printInfo();
-		cout << " " << v.getSocket() << " " << v.getAddress() << endl;
-	}
+
 	int c_write;
 	char answer[2];
 
@@ -325,7 +322,7 @@ int Server::sendAck(vector<Board>boards, int value) {
 			}
 		}
 
-		cout << "...done. Sent OK" << endl;
+		cout << "...done. Sent OK" << endl << endl;;
 	}
 	else {
 
@@ -337,14 +334,14 @@ int Server::sendAck(vector<Board>boards, int value) {
 				return 0;
 			}
 		}
-		cout << "...done. Sent NO" << endl;
+		cout << "...done. Sent NO" << endl << endl;
 	}
 	return 1;
 }
 
 /*					Receive ack messagges from boards				*/
 int Server::recvAck(vector<Board>boards) {
-	cout << "entering recvack" << endl;
+	
 	int c_read, value = 1;
 	char recvbuf[2];
 
@@ -385,12 +382,7 @@ int Server::recvAck(vector<Board>boards) {
 
 /*   Close the sockets and zeros the memory of the boards array     */
 void Server::closeConnections(vector<Board>(&boards)) {
-	cout << "entering closeconnections" << endl;
-	for (auto v : boards)
-	{
-		v.printInfo();
-		cout << " " << v.getSocket() << " " << v.getAddress() << endl;
-	}
+	
 	cout << "Closing sockets...";
 	for (int i = 0; i < NUMBER_ESP; i++) {
 
@@ -431,13 +423,11 @@ int Server::sendA(SOCKET s, int value) {
 
 /*		Loops until the server has accepted NUMBER_ESP boards	    */
 int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &sniffingFlag, bool &secondFlag) {
-	cout << "entering acceptConnections" << endl;
-	cout << "START FIRST ACCEPT CONNECTIONS" << endl;
-	cout << "il numero di esp connesse è: " << NUMBER_ESP  << endl;
+
+	cout << "\nSaved MAC are: " << endl;
 	for (auto v : boards)
 	{
 		v.printInfo();
-		cout << " " << v.getSocket() << " " << v.getAddress() << endl;
 	}
 
 	int connections = 0;		/* Count for the connections */
@@ -451,8 +441,7 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 	/* Try accepting the predicted number of connections */
 	while (connections != NUMBER_ESP) {
 
-		cout << "\t\tAccepting connections..." << endl;
-		cout << "\t\tconnections:" << connections <<  endl;
+		cout << "Accepting connections..." << endl;
 
 		/* Timeout structure */
 		fd_set sset;
@@ -510,12 +499,12 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 			char buffer[18];
 			cread = recv(client_socket, buffer, 18, 0);
 			if (cread != 18) {
-				cout << "MAC not received. Error: " << WSAGetLastError() << endl;
+				cout << "\tMAC not received. Error: " << WSAGetLastError() << endl;
 				closesocket(client_socket);
 				errorFlag = 1;
 			}
 			else {
-				cout << "MAC received " << buffer << endl;
+				cout << "\tMAC received " << buffer << endl;
 				errorFlag = 0;
 			}
 
@@ -526,7 +515,7 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 
 				/* Check if the connection is not coming from an already saved board */
 				for (int i = 0; i < NUMBER_ESP; i++) {
-					cout << "COMPARING saved MAC: " << boards[i].getMAC() << " and found MAC: " << MAC << endl;
+					//cout << "COMPARING saved MAC: " << boards[i].getMAC() << " and found MAC: " << MAC << endl;
 					if (boards[i].getMAC().compare(MAC) == 0) {
 						newBoardFlag = 0;
 						index = i;
@@ -534,18 +523,18 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 				}				
 
 				if (newBoardFlag) {
-					cout << "Different socket found!" << endl;
+					cout << "\tDifferent socket found!" << endl;
 					closesocket(client_socket);
 				}
 				else {
-					showAddr("Connection accepted from: ", &caddr, MAC);
+					showAddr("\tConnection accepted from: ", &caddr, MAC);
 					boards[index].setSocket(client_socket);
 					connections = connections++;
 
 					/* Discriminates a board that can detach from electricity while sniffing. Need to do not receive packets */
 					if (sniffingFlag) {
 						if (countTimeout > 0) {
-							cout << "The board has connected before the sniffing time end" << endl;
+							cout << "\tThe board has connected before the sniffing time end" << endl;
 							result = 2;
 						}
 					}
@@ -554,7 +543,7 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 		}
 	}
 
-	cout << "Server has accepted " << NUMBER_ESP << " connections!" << endl;
+	cout << "Server has accepted " << NUMBER_ESP << " connections!" << endl << endl;
 
 	return result;
 }
@@ -562,7 +551,6 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 /*      Shows the address of the host passed among the values       */
 void Server::showAddr(const char * s, struct sockaddr_in *a, string MAC)
 {
-	cout << "entering showAddr" << endl;
 	char buf[INET_ADDRSTRLEN];
 
 	if (inet_ntop(AF_INET, &(a->sin_addr), buf, sizeof(buf)) != NULL)
@@ -796,7 +784,7 @@ Server::~Server()
 
 int Server::acceptBoard(int x,vector<Board>(&boards)) {
 
-	cout << "Enter acceptBoard" << endl;
+	//cout << "Enter acceptBoard" << endl;
 
 	int attempts = 0;									/* Number of attemps to decide when quit the program */
 	int client_socket;
@@ -853,15 +841,16 @@ int Server::acceptBoard(int x,vector<Board>(&boards)) {
 				errorFlag = 1;
 			}
 			else {
-				cout << "\tMAC received " << buffer << endl;
+				//cout << "\tMAC received " << buffer << endl;
 				errorFlag = 0;
 			}
 
 			/* If the reading of the MAC address has been done succesfully */
 			if (!errorFlag) {
-				cout << "da interfaccia " << boards[x].getMAC() << endl;
+				//cout << "da interfaccia " << boards[x].getMAC() << endl;
 				string MAC(buffer);
-				cout << "entering strcmp" << endl;
+				//cout << "entering strcmp" << endl;
+				
 				if (strcmp(boards[x].getMAC().c_str(), MAC.c_str()) == 0)
 				{
 					//cout << "\t\tFound" << endl;
@@ -872,7 +861,7 @@ int Server::acceptBoard(int x,vector<Board>(&boards)) {
 					found = true;
 				}
 				else {
-					cout << "\t\tNot found" << endl;
+					//cout << "\t\tNot found" << endl;
 					closesocket(client_socket);
 				}
 			}
