@@ -7,12 +7,11 @@ Misura::Misura()
 	Schedaptr = nullptr;
 	rssi = 1.0;
 }
-Misura::Misura(Board* scheda, double new_rssi)
+Misura::Misura(string schedaMac, double new_rssi)
 {
-	Schedaptr = scheda;
+	MACaddr = schedaMac;
 	rssi = new_rssi;
-	distanza = distanza;
-	MACaddr = scheda->getMac();
+	distanza = distanza; //???
 	distanza = pow(10, (TXPower - rssi) / (10 * N));
 }
 

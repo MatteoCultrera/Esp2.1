@@ -247,6 +247,78 @@ namespace EspInterface.Views
 
         }
 
+        private bool roomValid()
+        {
+
+            BoardInGrid[] array = boardsInGrid.ToArray();
+
+            for(int i = 0; i < array.Length-1; i++)
+            {
+                for(int j = i+1; j < array.Length; j++)
+                {
+                    if (linesIntersect(array[i].roomLine, array[j].roomLine))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool linesIntersect(Line l1, Line l2)
+        {
+            My2dVector p = new My2dVector(l1.X1, l1.Y1);
+            My2dVector p2 = new My2dVector(l1.X2, l1.Y2);
+
+            My2dVector q = new My2dVector(l2.X1, l2.Y1);
+            My2dVector q2 = new My2dVector(l2.X2, l2.Y2);
+
+            var r = p2 - p;
+            var s = q2 - q;
+            var rxs = r.Cross(s);
+            var qpxr = (q - p).Cross(r);
+
+            // If r x s = 0 and (q - p) x r = 0, then the two lines are collinear.
+            /*
+            if (rxs.IsZero() && qpxr.IsZero())
+            {
+                // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
+                // then the two lines are overlapping,
+                if ((0 <= (q - p) * r && (q - p) * r <= r * r) || (0 <= (p - q) * s && (p - q) * s <= s * s))
+                    return true;
+
+                // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
+                // then the two lines are collinear but disjoint.
+                // No need to implement this expression, as it follows from the expression above.
+                return false;
+            }*/
+
+            // 3. If r x s = 0 and (q - p) x r != 0, then the two lines are parallel and non-intersecting.
+            if (rxs.IsZero() && !qpxr.IsZero())
+                return false;
+
+            // t = (q - p) x s / (r x s)
+            var t = (q - p).Cross(s) / rxs;
+
+            // u = (q - p) x r / (r x s)
+
+            var u = (q - p).Cross(r) / rxs;
+
+            // 4. If r x s != 0 and 0 <= t <= 1 and 0 <= u <= 1
+            // the two line segments meet at the point p + t r = q + u s.
+            if (!rxs.IsZero() && (0 <= t && t <= 1) && (0 <= u && u <= 1))
+            {
+                var intersection = p + t * r;
+
+                if (intersection == p || intersection == p2 || intersection == q || intersection == q2)
+                    return false;
+                // An intersection was found.
+                return true;
+            }
+
+            // 5. Otherwise, the two line segments are not parallel but do not intersect.
+            return false;
+        }
+
         public void setMeters(BoardInGrid b, Image toTrack)
         {
             //This works only with getTop, so we must subtract the canvas height
@@ -310,6 +382,9 @@ namespace EspInterface.Views
                 board.roomLine.Visibility = Visibility.Visible;
                 board.roomLine.X2 = Canvas.GetLeft(boardsInGrid[0].getCan()) + Measures.offsetBoardExternal;
                 board.roomLine.Y2 = 575 - Canvas.GetBottom(boardsInGrid[0].getCan()) + Measures.offsetBoardExternal;
+                bool validRoom = roomValid();
+                sm.roomValidity(validRoom);
+                colorLines(validRoom);
             }
 
 
@@ -1024,12 +1099,38 @@ namespace EspInterface.Views
 
                 setMetersStart(draggingBoardPositioned);
 
+                //Check if the room is valid only if I have all boards
+                if(boardsInGrid.Count == sm.boards)
+                {
+                    bool validRoom = roomValid();
+                    sm.roomValidity(validRoom);
+                    colorLines(validRoom);
+
+                }
+
             }
             draggingImage = null;
             draggingBoardPositioned = null;
         }
 
+        public void colorLines(bool validRoom)
+        {
+            SolidColorBrush color = new SolidColorBrush();
+            if (validRoom)
+                color.Color = Colors.White;
+            else
+                color.Color = Colors.Red;
 
+            foreach (BoardInGrid b in boardsInGrid)
+            {
+                if(b.roomLine != null)
+                {
+                    b.roomLine.Stroke = color;
+                }
+            }
+
+        }
+        
 
         public class BoardInGrid
         {
@@ -1082,7 +1183,7 @@ namespace EspInterface.Views
 
                 roomLine = new Line()
                 {
-                    StrokeThickness = 2,
+                    StrokeThickness = 3,
                     Stroke = color
                 };
 
@@ -1410,6 +1511,79 @@ namespace EspInterface.Views
         }
 
     }
+
+    //Helps double check if isZero
+    public static class Extensions
+    {
+        private const double Epsilon = 1e-10;
+
+        public static bool IsZero(this double d)
+        {
+            return Math.Abs(d) < Epsilon;
+        }
+    }
+
+    //Useful for calulations with 2D points
+    public class My2dVector
+    {
+        public double X;
+        public double Y;
+
+        // Constructors.
+        public My2dVector(double x, double y) { X = x; Y = y; }
+        public My2dVector() : this(double.NaN, double.NaN) { }
+
+        public static My2dVector operator -(My2dVector v, My2dVector w)
+        {
+            return new My2dVector(v.X - w.X, v.Y - w.Y);
+        }
+
+        public static My2dVector operator +(My2dVector v, My2dVector w)
+        {
+            return new My2dVector(v.X + w.X, v.Y + w.Y);
+        }
+
+        public static double operator *(My2dVector v, My2dVector w)
+        {
+            return v.X * w.X + v.Y * w.Y;
+        }
+
+        public static My2dVector operator *(My2dVector v, double mult)
+        {
+            return new My2dVector(v.X * mult, v.Y * mult);
+        }
+
+        public static My2dVector operator *(double mult, My2dVector v)
+        {
+            return new My2dVector(v.X * mult, v.Y * mult);
+        }
+
+        public static bool operator ==(My2dVector one, My2dVector two)
+        {
+            if (one.X == two.X && one.Y == two.Y)
+                return true;
+            return false;
+        }
+
+        public static bool operator !=(My2dVector one, My2dVector two)
+        {
+            if (one.X == two.X && one.Y == two.Y)
+                return false;
+            return true;
+        }
+
+        public double Cross(My2dVector v)
+        {
+            return X * v.Y - Y * v.X;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var v = (My2dVector)obj;
+            return (X - v.X).IsZero() && (Y - v.Y).IsZero();
+        }
+    }
+
 }
 
 

@@ -8,7 +8,6 @@ class Board
 	SOCKET s;
 	uint32_t address;
 	string MAC; //mac from server
-	string cMac; //mac from interface
 	int bPosx;
 	int bPosy;
 

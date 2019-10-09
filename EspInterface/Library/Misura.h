@@ -11,12 +11,13 @@ private:
 
 public:
 	Misura();
-	Misura(Board* scheda, double new_rssi);
+	Misura(string schedaMac, double new_rssi);
 	~Misura();
 	Misura(const Misura& misura);
 
 	double getRssi();
 	double getDistanza();
+	double getRssi();
 	const char* getMACaddrScheda();
 	Board* getSchedaPtr();
 

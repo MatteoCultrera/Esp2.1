@@ -289,6 +289,7 @@ namespace EspInterface.ViewModels
             switch (screen) {
                 case 1:
                     screen = 2;
+                
                     numBoards = "";
                     Title = "Insert Boards MAC";
                     Subtitle = "You can also change board's names";
@@ -328,7 +329,8 @@ namespace EspInterface.ViewModels
                     
                     foreach (Board b in BoardObjs)
                     {
-                       thr.myObj.set_board_toCheck(b.MAC.ToCharArray(0, 17));
+                       char[] c = b.MAC.ToCharArray(0,17);
+                       thr.myObj.set_board_toCheck(c);
                     }
 
                     foreach (Board b in BoardObjs)
@@ -355,7 +357,7 @@ namespace EspInterface.ViewModels
 
                     }
                     //ora che le schedine sono connesse e ho inserito le posizioni, lancio t2.serverGo()
-                    if (t2 != null && !t.IsAlive)
+                    if (t2 == null)
                     {
                             t2 = new Thread(new ThreadStart(thr.ServerGo));
                             t2.Start();
@@ -399,6 +401,23 @@ namespace EspInterface.ViewModels
                 this.NotifyPropertyChanged("ButtonEnabled");
 
             }
+        }
+
+        public void roomValidity(bool valid)
+        {
+            if (valid)
+            {
+                Title = "All Boards Positioned";
+                Subtitle = "";
+                ButtonEnabled = true;
+            }
+            else
+            {
+                Title = "Room Not Valid";
+                Subtitle = "The lines should not intersect";
+                ButtonEnabled = false;
+            }
+            
         }
 
         public void allPositioned() {

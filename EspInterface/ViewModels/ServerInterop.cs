@@ -99,6 +99,7 @@ namespace EspInterface.ViewModels
             //send all data togheter, with real posx,posy
             foreach (Board b in BoardObjs)
             {
+                Debug.WriteLine(b.MAC);
                 myObj.set_board_user(b.MAC.ToCharArray(0, 17), b.posX, b.posY);
             }
             myObj.printBoardList();

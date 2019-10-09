@@ -42,6 +42,9 @@
     <ClInclude Include="..\EspInterface\Library\Misura.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\EspInterface\Library\Trilateration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\EspInterface\Library\Board.cpp">
