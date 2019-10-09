@@ -30,13 +30,23 @@ namespace EspInterface.ViewModels
             ManagedWrapper.set_value(native_instance_, value);
         }
 
-        public IntPtr checkMacAddr(char[] macAddr, int size)
+        public int checkMacAddr()
         {
-            return ManagedWrapper.checkMacAddr(native_instance_, macAddr, size);
+            return ManagedWrapper.checkMacAddr(native_instance_);
         }
         public int set_board_user(char[] macAddr, int posx, int posy)
         {
             return ManagedWrapper.set_board_user(native_instance_, macAddr, posx, posy);
+        }
+
+        public int set_board_toCheck(char[] macAddr)
+        {
+            return ManagedWrapper.set_board_toCheck(native_instance_, macAddr);
+        }
+
+        public void serverGo()
+        {
+            ManagedWrapper.serverGo(native_instance_);
         }
 
         public void printBoardList()

@@ -25,7 +25,7 @@ void Dispositivo::inserisciMAC(std::string new_MACaddr)
 }
 
 void Dispositivo::aggiungiMisura(Misura new_misura) //Aggiungo una nuova misura solo se viene da una schedina che non ha ancora fornito misure
-{													//così mantengo una sola misura per schedina
+{													//così mantengo una sola misura per schedina --- ma così facendo non tengo solo la prima trovata nel file?
 	for (unsigned int i = 0; i < MACschede.size(); i++)
 	{
 		std::string tmp = MACschede[i];
@@ -88,6 +88,11 @@ void Dispositivo::calcolaCoordinate()
 		}
 	}
 
+}
+
+Misura Dispositivo::getMisura() 
+{
+	return 
 }
 
 int Dispositivo::getNumMisure()

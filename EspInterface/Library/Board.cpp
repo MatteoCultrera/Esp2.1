@@ -1,21 +1,14 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include "stdafx.h"
 #include "Board.h"
 using namespace std;
 
 
 
 Board::Board(char *cMac, int posx, int posy) {
-	this->cMac = cMac; //mac from interface
 	this->bPosx = posx;
 	this->bPosy = posy;
 	this->s = 0;
 	this->address = 0;
-	this->MAC = ""; //mac from server
+	this->MAC = cMac; //mac from server
 }
 
 Board::Board()
@@ -29,7 +22,7 @@ Board::~Board()
 void
 Board::printInfo()
 {
-	cout << "my info are: " << cMac << " , " << bPosx << " , " << bPosy;
+	cout << "my info are: " << MAC << " , " << bPosx << " , " << bPosy;
 }
 
 int
@@ -44,7 +37,7 @@ Board::get_posY() {
 
 string
 Board::getMac() { //mac from interface
-	return cMac;
+	return this->MAC;
 }
 
 
@@ -67,11 +60,11 @@ void Board::setMAC(std::string MAC) {
 }
 
 SOCKET Board::getSocket() {
-	return s;
+	return this->s;
 }
 
 uint32_t Board::getAddress() {
-	return address;
+	return this->address;
 }
 
 std::string Board::getMAC() {

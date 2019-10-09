@@ -48,29 +48,15 @@ void Packet::setCRC(uint8_t t[4]) {
 	}
 }
 
-void Packet::printPacket() {
-
-	printf("%" PRIu64 " PROBE  CHAN=%02d,  SEQ=%02x%02x,  RSSI=%02d, "
-		" ADDR=%02x:%02x:%02x:%02x:%02x:%02x,  ",
-		timestamp,
-		channel,
-		seq_ctl[0], seq_ctl[1],
-		rssi,
-		addr[0], addr[1], addr[2],
-		addr[3], addr[4], addr[5]
-	);
-	printf("SSID=");
-	for (int i = 0; i<ssid_length; i++)
-		printf("%c", (char)ssid[i]);
-	printf("  CRC=");
-	for (int i = 0; i<4; i++)
-		printf("%02x", crc[i]);
-	printf("\n");
+void Packet::setBoardMac(std::string MAC) {
+	this->board_mac = MAC;
 }
 
 void Packet::printFile(FILE *fd) {
-	fprintf(fd, "%" PRIu64 " PROBE CHAN=%02d,  SEQ=%02x%02x,  RSSI=%02d, "
+	
+	fprintf(fd, "Board Mac=%s ----> %" PRIu64 " PROBE CHAN=%02d,  SEQ=%02x%02x,  RSSI=%02d, "
 		" ADDR=%02x:%02x:%02x:%02x:%02x:%02x,  ",
+		board_mac.c_str(),
 		timestamp,
 		channel,
 		seq_ctl[0], seq_ctl[1],

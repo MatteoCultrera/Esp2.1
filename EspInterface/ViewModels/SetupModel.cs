@@ -126,9 +126,11 @@ namespace EspInterface.ViewModels
         private int screen;
         private bool _buttonEnabled;
         private ICommand _okButton;
-        public int numMac;
+        public int numMac,res;
         public List<string> macList = new List<string>();
         public ServerInterop thr;
+        private ManagedObject myObj;
+        Thread t,t2;
 
         public string textBoxEnabled {
             get {
@@ -260,6 +262,7 @@ namespace EspInterface.ViewModels
 
         }
 
+/*      elimina quando funziona correttamente la checkMacAddr asincrona
         public delegate void ExampleCallback(int[] resArray, int boards, ServerInterop thr); // in order to accept thread returns, we must add this class. do not delete ! 
 
         public static void ResultCallback(int[] resArray, int boards, ServerInterop thr)
@@ -280,12 +283,13 @@ namespace EspInterface.ViewModels
                 t.Start();
             }
         }
-
+*/
         private void okClick(object sender)
         {
             switch (screen) {
                 case 1:
                     screen = 2;
+                
                     numBoards = "";
                     Title = "Insert Boards MAC";
                     Subtitle = "You can also change board's names";
@@ -300,24 +304,50 @@ namespace EspInterface.ViewModels
                     screen = 3;
                     foreach (Board b in BoardObjs) {
                         b.macEditable = false;
-                        //give to the server the board mac
                     }
                     Title = "Connecting";
                     Subtitle = "";
                     ButtonEnabled = false;
                     screen3?.Invoke(this, null);
                     //Start connecting with the server
+                    
+                    thr = new ServerInterop(boards, BoardObjs);//nel costruttore del serverInterop setto il costruttore del server e lancio server.dosetup()
 
-                    //MARTI: il thread viene creato la prima volta ma se torno indietro
-                    //perché una schedina viene rfiutata lo ricrea e blocca l'app
-                    //devi controllare che il thread esista prima di ricrearlo
+                    //before launching the server thread we check if it already exists
+                    /*if (t != null && !t.IsAlive)
+                    {
+                        foreach (Board b in BoardObjs)
+                        {
+                            t = new Thread(new ThreadStart(thr.CheckMacAddr));
+                            t.Start();
+                            Debug.WriteLine("t created and started");
+                        }
+                    }
+                    else
+                        Debug.WriteLine("t already running!");
+                    */
+                    
+                    foreach (Board b in BoardObjs)
+                    {
+                       char[] c = b.MAC.ToCharArray(0,17);
+                       thr.myObj.set_board_toCheck(c);
+                    }
 
-                    //thr = new ServerInterop(new ExampleCallback(ResultCallback), boards, BoardObjs);
+                    foreach (Board b in BoardObjs)
+                    {
 
-
-                    //Thread t = new Thread(new ThreadStart(thr.CheckMacAdddr));
-                    //t.Start();
+                        res = thr.myObj.checkMacAddr();
+                        if (res == 0)
+                        {
+                            boardConnected(b.MAC);
+                        }
+                        else
+                        {
+                            errorBoard(b.MAC);
+                        }
+                    }
                     break;
+
                 case 3:
                     string s = "";
                     foreach (Board b in BoardObjs) {
@@ -326,6 +356,16 @@ namespace EspInterface.ViewModels
 
 
                     }
+                    //ora che le schedine sono connesse e ho inserito le posizioni, lancio t2.serverGo()
+                    if (t2 == null)
+                    {
+                            t2 = new Thread(new ThreadStart(thr.ServerGo));
+                            t2.Start();
+                            Debug.WriteLine("t2 created and started");
+                    }
+                    else
+                        Debug.WriteLine("t2 already running!");
+
                     //MessageBox.Show(s);
                     var args = new ErrorEventArgs
                     {

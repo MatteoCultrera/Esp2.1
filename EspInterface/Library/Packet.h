@@ -3,6 +3,7 @@
 
 class Packet
 {
+	std::string board_mac;
 	uint64_t timestamp;
 	uint8_t channel;
 	uint8_t seq_ctl[2];
@@ -23,6 +24,7 @@ public:
 	void setSSIDLength(uint8_t t);
 	void setSSID(uint8_t t[32]);
 	void setCRC(uint8_t t[4]);
+	void setBoardMac(std::string mac);
 	void printPacket();
 	void printFile(FILE *fd);
 };

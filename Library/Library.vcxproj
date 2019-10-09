@@ -45,7 +45,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,7 +69,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -87,8 +89,12 @@
     </ClCompile>
     <PostBuildEvent />
     <PostBuildEvent>
-      <Command>xcopy /d /y "$(SolutionDir)x64\Debug\*.*" "$(SolutionDir)EspInterface\bin\Debug\"</Command>
+      <Command>xcopy /d /y $(SolutionDir)x64\Debug\*.* $(SolutionDir)EspInterface\bin\Debug\</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -117,6 +123,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /d /y “$(SolutionDir)x64\Debug\*.*” “$(SolutionDir)Interop\bin\Debug\”</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\EspInterface\Library\Board.h" />
@@ -128,6 +141,7 @@
     <ClInclude Include="..\EspInterface\Library\Server.h" />
     <ClInclude Include="..\EspInterface\Library\stdafx.h" />
     <ClInclude Include="..\EspInterface\Library\targetver.h" />
+    <ClInclude Include="..\EspInterface\Library\Trilateration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\EspInterface\Library\Board.cpp" />
@@ -136,6 +150,7 @@
     <ClCompile Include="..\EspInterface\Library\NativeObject.cpp" />
     <ClCompile Include="..\EspInterface\Library\NativeWrapper.cpp" />
     <ClCompile Include="..\EspInterface\Library\Packet.cpp" />
+    <ClCompile Include="..\EspInterface\Library\PacketQueue.cpp" />
     <ClCompile Include="..\EspInterface\Library\Trilateration.cpp" />
     <ClCompile Include="..\EspInterface\Library\Server.cpp" />
     <ClCompile Include="..\EspInterface\Library\stdafx.cpp" />

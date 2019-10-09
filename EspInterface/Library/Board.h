@@ -1,9 +1,6 @@
 #pragma once
-#include <list> 
-#include <iterator> 
-#include <string>
-#include <cstring>
 #include "stdafx.h"
+
 using namespace std;
 
 class Board
@@ -11,7 +8,6 @@ class Board
 	SOCKET s;
 	uint32_t address;
 	string MAC; //mac from server
-	string cMac; //mac from interface
 	int bPosx;
 	int bPosy;
 

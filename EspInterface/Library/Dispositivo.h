@@ -25,6 +25,7 @@ public:
 	void aggiungiMisura(Misura new_misura);
 	void inserisciSchede(std::vector <std::string>& new_schede);
 
+	Misura getMisura();
 	void calcolaCoordinate();
 
 	int getNumMisure();
