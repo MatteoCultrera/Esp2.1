@@ -286,6 +286,7 @@ namespace EspInterface.ViewModels
             switch (screen) {
                 case 1:
                     screen = 2;
+                
                     numBoards = "";
                     Title = "Insert Boards MAC";
                     Subtitle = "You can also change board's names";
