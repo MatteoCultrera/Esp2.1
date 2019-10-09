@@ -29,19 +29,53 @@ namespace EspInterface.ViewModels
         private ObservableCollection<Board> BoardObjs;
         private int res;
         SetupModel instance;
+        
 
 
-        public ServerInterop(int boards, ObservableCollection<Board> BoardObjs)
+        public ServerInterop(int boards, ObservableCollection<Board> BoardObjs, SetupModel instance)
         {
             this.boards = boards;
             this.BoardObjs = new ObservableCollection<Board>(BoardObjs);
             myObj = new ManagedObject(boards); //send number of boards
+            this.instance = instance;
             
             //metto qui la createsetboardtocheck?
             /*foreach (Board b in BoardObjs)
             {
                 myObj.set_board_toCheck(b.MAC.ToCharArray(0, 17));
             }*/
+        }
+
+        public void connectBoards()
+        {
+            foreach (Board b in BoardObjs)
+            {
+                char[] c = b.MAC.ToCharArray(0, 17);
+                myObj.set_board_toCheck(c);
+            }
+
+            foreach (Board b in BoardObjs)
+            {
+
+                res = myObj.checkMacAddr();
+                if (res == 0 && Application.Current != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                        //This will be executed in the main thread
+                        instance.boardConnected(b.MAC);
+                    }));
+               
+                }
+                else if (Application.Current != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() => {
+                        instance.errorBoard(b.MAC);
+                    }));
+                    //instance.errorBoard(b.MAC);
+
+                    break;
+                }
+            }
         }
 
       /*  
@@ -112,4 +146,5 @@ namespace EspInterface.ViewModels
             //sleep 60
         }
     }
+
 }
