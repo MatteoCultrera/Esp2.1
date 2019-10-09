@@ -363,6 +363,23 @@ namespace EspInterface.ViewModels
             }
         }
 
+        public void roomValidity(bool valid)
+        {
+            if (valid)
+            {
+                Title = "All Boards Positioned";
+                Subtitle = "";
+                ButtonEnabled = true;
+            }
+            else
+            {
+                Title = "Room Not Valid";
+                Subtitle = "The lines should not intersect";
+                ButtonEnabled = false;
+            }
+            
+        }
+
         public void allPositioned() {
             int i = 0;
             foreach (Board b in BoardObjs) {
