@@ -141,6 +141,7 @@
     <ClInclude Include="..\EspInterface\Library\Server.h" />
     <ClInclude Include="..\EspInterface\Library\stdafx.h" />
     <ClInclude Include="..\EspInterface\Library\targetver.h" />
+    <ClInclude Include="..\EspInterface\Library\Trilateration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\EspInterface\Library\Board.cpp" />
