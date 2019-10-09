@@ -137,7 +137,7 @@ namespace EspInterface.ViewModels
                 myObj.set_board_user(b.MAC.ToCharArray(0, 17), b.posX, b.posY);
             }
             myObj.printBoardList();
-            Debug.WriteLine("All Boards connected. Object Board set. Gonna launch Server.go");
+            Debug.WriteLine("All Boards connected. Object Board set. Gonna launch Server.go\n\n");
             myObj.serverGo();
             //to do:
             //sleep 60 sec

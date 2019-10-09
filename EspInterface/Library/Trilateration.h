@@ -20,7 +20,7 @@ private:
 
 public:
 
-	Trilateration(vector<Board> *boards);
+	Trilateration(vector<Board>(&boards));
 	~Trilateration() {};
 
 	void scanFile();
