@@ -58,6 +58,7 @@ void setTrilateration(vector<Board>boards)
 		devicesFound = tmpDevicesFound;
 		//rilascio mutex
 
+
 	}
 	
 }
@@ -782,7 +783,7 @@ Server::~Server()
 	}
 }
 
-int Server::acceptBoard(int x,vector<Board>(&boards)) {
+int Server::acceptBoard(vector<Board>(&boards)) {
 
 	//cout << "Enter acceptBoard" << endl;
 
@@ -850,20 +851,33 @@ int Server::acceptBoard(int x,vector<Board>(&boards)) {
 				//cout << "da interfaccia " << boards[x].getMAC() << endl;
 				string MAC(buffer);
 				//cout << "entering strcmp" << endl;
-				
-				if (strcmp(boards[x].getMAC().c_str(), MAC.c_str()) == 0)
+
+				for (int x = 0; x < NUMBER_ESP; x++) 
 				{
-					//cout << "\t\tFound" << endl;
-					showAddr("New connection accepted from: ", &caddr, MAC);
-					boards[x].setSocket(client_socket);
-					boards[x].setAddress(caddr.sin_addr.s_addr);
-					result = 0;
-					found = true;
+					//cout << "COMPARING saved MAC: " << boards[i].getMAC() << " and found MAC: " << MAC << endl;
+					if (strcmp(boards[x].getMAC().c_str(), MAC.c_str()) == 0)
+					{
+						//cout << "\t\tFound" << endl;
+						if (std::find(boardsIndexConnected.begin(), boardsIndexConnected.end(), x) != boardsIndexConnected.end()) 
+						{
+							/* Board già connessa */
+							showAddr("Connection already accepted from: ", &caddr, MAC);
+						}
+						else 
+						{
+							/* Nuova Board da connettere */
+							showAddr("New connection accepted from: ", &caddr, MAC);
+							boards[x].setSocket(client_socket);
+							boards[x].setAddress(caddr.sin_addr.s_addr);
+							result = x;
+							boardsIndexConnected.push_back(x);
+							found = true;
+							break;
+						}
+					}
 				}
-				else {
-					//cout << "\t\tNot found" << endl;
+				if (!found)
 					closesocket(client_socket);
-				}
 			}
 		}
 	}

@@ -63,8 +63,7 @@ int
 NativeObject::checkMacAddr() 
 {
 	/*Contact server and check addresses*/
-	int result = server->acceptBoard(counterBoardToCheck, boardsVect2);
-	counterBoardToCheck++;
+	int result = server->acceptBoard(boardsVect2);
 	return result;
 }
 
@@ -128,6 +127,12 @@ NativeObject::printBoardList()
 	{
 		myfile2 << v.getMac() << ", " << v.get_posX() << ", " << v.get_posY() << endl;
 	}
+}
+
+int 
+NativeObject::getDevicesAndPos(char* listOfMac, int* listOfPosX, int* listOfPosY)
+{
+	return 0;
 }
 
 

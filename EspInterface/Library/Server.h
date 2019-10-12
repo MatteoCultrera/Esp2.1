@@ -28,7 +28,8 @@ public:
 	~Server();
 	int doSetup();
 	int serverGo(PacketQueue &pq, vector<Board>(&boards));
-	int acceptBoard(int x, vector<Board>(&boards));
+	int acceptBoard(vector<Board>(&boards));
+	vector<int> boardsIndexConnected;
 	vector<Dispositivo>* getDevices();
 };
 

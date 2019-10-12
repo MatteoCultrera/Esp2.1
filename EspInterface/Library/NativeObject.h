@@ -16,6 +16,7 @@ public:
 	void set_value(int value);
 	int checkMacAddr();
 	void getDevices();
+	int getDevicesAndPos(char *listOfMac, int *listOfPosX, int *listOfPosY);
 	int set_board_user(char *macAddr, int posx, int posy);
 	int set_board_toCheck(char *macAddr);
 	void serverGo();

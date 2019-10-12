@@ -38,7 +38,10 @@ extern "C" LIBRARY_EXPORT void serverGo(NativeObject* instance) {
 	return instance->serverGo();
 }
 
-
 extern "C" LIBRARY_EXPORT void printBoardList(NativeObject* instance) {
 		return instance->printBoardList();
+}
+
+extern "C" LIBRARY_EXPORT int getDevicesAndPos(NativeObject* instance, char *listOfMac, int *listOfPosX, int *listOfPosY) {
+	return instance->getDevicesAndPos(listOfMac, listOfPosX, listOfPosY);
 }

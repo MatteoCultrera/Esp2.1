@@ -27,7 +27,9 @@ namespace EspInterface.ViewModels
         public ManagedObject myObj;
         private int boards;
         private ObservableCollection<Board> BoardObjs;
+        public ObservableCollection<Device> DeviceObjs;
         private int res;
+        private List<int> nToConnBoards;
         SetupModel instance;
         
 
@@ -48,16 +50,45 @@ namespace EspInterface.ViewModels
 
         public void connectBoards()
         {
+            nToConnBoards = Enumerable.Range(0, boards).ToList();
+
             foreach (Board b in BoardObjs)
             {
                 char[] c = b.MAC.ToCharArray(0, 17);
                 myObj.set_board_toCheck(c);
             }
 
+            while (nToConnBoards.Count != 0)
+            {
+                res = myObj.checkMacAddr();
+
+                /* res -> [0-n] dove n = boards, accendi icona corrispondente */
+                /* res -> -1 significa timeout nel server quindi chiama errorBoard() */
+
+                if (res >= 0 && Application.Current != null)
+                {
+                    instance.boardConnected(BoardObjs[res].MAC);
+                    nToConnBoards.Remove(res);
+                }
+                else if (res == -1 && Application.Current != null)
+                {
+                    foreach (int i in nToConnBoards)
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            instance.errorBoard(BoardObjs[i].MAC);
+                        }));
+                        break;
+                    }
+                }
+            }
+
+            /*
             foreach (Board b in BoardObjs)
             {
 
                 res = myObj.checkMacAddr();
+
                 if (res == 0 && Application.Current != null)
                 {
                     Application.Current.Dispatcher.Invoke(new Action(() => {
@@ -75,7 +106,7 @@ namespace EspInterface.ViewModels
 
                     break;
                 }
-            }
+            }*/
         }
 
       /*  
@@ -93,39 +124,9 @@ namespace EspInterface.ViewModels
             //this class and its methods are the ones called by the c# thread in setupModel. The Thread runs all server functions ! 
 
 
-        public void CheckMacAddr()
+        public void UpdateDevicePos(string MacDevice, int x, int y)
         {
-
-            /* string tmp = string.Empty;
-             int y = 0;
-             foreach (Board b in BoardObjs)
-             {
-                 if (y != 0)
-                     tmp += ',' + b.MAC;
-                 else
-                     tmp = b.MAC;
-                 y++;
-             }
-             IntPtr result = myObj.checkMacAddr(tmp.ToCharArray(0, 17 * (y) + y - 1), tmp.Length); //check a single string with all macAdd. returns an array of int with 0 if macAddr not connecter, 1 otherwise
-             int[] resArray = new int[boards];
-             Marshal.Copy(result, resArray, 0, boards);
-             //callback(resArray, boards, this);
-             //x Matte :bisogna aggiungere che sulla base dell'array di int alcune schede diventano verdi altre rosse ! in alternativa (forse è meglio) tornare alla schermata di inserimento di tutte le schedine
-         
-            foreach (Board b in BoardObjs)
-            {
-                
-                res=myObj.checkMacAddr();
-                if(res == 0)
-                {
-                    boardConnected(b.MAC);
-                }
-                else
-                {
-                    errorBoard(b.MAC);
-                }
-            }
-            */
+            
         }
 
         public void ServerGo()

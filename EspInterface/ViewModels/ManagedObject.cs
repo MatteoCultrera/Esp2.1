@@ -53,5 +53,10 @@ namespace EspInterface.ViewModels
         {
             ManagedWrapper.printBoardList(native_instance_);
         }
+
+        public int getDeviceAndPos(char[] listOfMac, int[] listOfPosX, int[] listOfPosY)
+        {
+            return ManagedWrapper.getDevicesAndPos(native_instance_, listOfMac, listOfPosX, listOfPosY);
+        }
     }
 }

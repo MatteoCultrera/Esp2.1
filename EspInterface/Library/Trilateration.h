@@ -15,8 +15,10 @@ private:
 	std::map<std::string, Dispositivo> dispositivi;
 	std::map<std::string, Board>::iterator it_schede;
 	std::map<std::string, Dispositivo>::iterator it_dispositivi;
+	vector<Dispositivo> devicesFound;
 	double x, y;
 	int roundx, roundy;
+	string foundMac;
 
 public:
 
@@ -25,5 +27,5 @@ public:
 
 	void scanFile();
 	vector<Dispositivo>* calcCoords();
-
+	
 };
