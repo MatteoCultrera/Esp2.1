@@ -29,21 +29,89 @@ namespace EspInterface
         public StatisticsModel statistics;
 
         List<menuItem> listItems;
+        List<Board> boards;
+        private DebugPhase phase = DebugPhase.monitor;
+
+        public enum DebugPhase
+        {
+            none, setup, monitor, statistics
+        };
+
         public MainWindow()
         {
             InitializeComponent();
-            setup = new SetupModel();
+            setup = new SetupModel(this);
             monitor = new MonitorModel();
             statistics = new StatisticsModel();
 
             listItems = new List<menuItem>();
-            listItems.Add(new menuItem() { enabled = true, text = "Border Setup" });
-            listItems.Add(new menuItem() { enabled = false, text = "Room Monitor" });
-            listItems.Add(new menuItem() { enabled = false, text = "Statistics" });
-            listItems.Add(new menuItem() { enabled = true, text = "Quit App" });
+
+            switch (phase)
+            {
+                case DebugPhase.none:
+                case DebugPhase.setup:
+                    listItems.Add(new menuItem() { enabled = true, text = "Border Setup" });
+                    listItems.Add(new menuItem() { enabled = false, text = "Room Monitor" });
+                    listItems.Add(new menuItem() { enabled = false, text = "Statistics" });
+                    listItems.Add(new menuItem() { enabled = true, text = "Quit App" });
+                    break;
+
+                case DebugPhase.monitor:
+                    //Here we generate a stub of boards to be used on the monitor phase
+                    listItems.Add(new menuItem() { enabled = false, text = "Border Setup" });
+                    listItems.Add(new menuItem() { enabled = true, text = "Room Monitor" });
+                    listItems.Add(new menuItem() { enabled = true, text = "Statistics" });
+                    listItems.Add(new menuItem() { enabled = true, text = "Quit App" });
+                    boards = new List<Board>();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        boards.Add(new Board("/Resources/Icons/Boards/Board" + i + "N.png", "Board " + i.ToString(), false, i));
+                        boards[i].HasMac = true;
+                        boards[i].MAC = "AA:AA:AA:AA:AA:AA:A" + i;
+                    }
+
+                    boards[0].posX = 0; boards[0].posY = 0;
+                    boards[0].posX = 10; boards[0].posY = 0;
+                    boards[0].posX = 0; boards[0].posY = 10;
+                    boards[0].posX = 10; boards[0].posY = 10;
+                    ObservableCollection<Board> obsBoards = new ObservableCollection<Board>(boards);
+                    monitor.boards = obsBoards;
+                    break;
+
+
+            }
+            
             
 
             lbMenu.ItemsSource = listItems;
+
+            
+            if(phase == DebugPhase.monitor)
+                lbMenu.SelectedIndex = 1;
+
+            if (phase == DebugPhase.statistics)
+                lbMenu.SelectedIndex = 2;
+        
+            //Debug code to force a single phase
+        }
+
+        public void setupEnded(List<Board> boards)
+        {
+            this.boards = boards;
+
+            listItems[0].enabled = false;
+            listItems[1].enabled = true;
+            listItems[2].enabled = true;
+
+            ObservableCollection<Board> obsBoards = new ObservableCollection<Board>(boards);
+            monitor.boards = obsBoards;
+        
+        }
+
+        //Debug code to force Monitor
+        private void debugForceMonitor()
+        {
+
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e) {

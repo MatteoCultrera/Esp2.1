@@ -96,6 +96,7 @@ namespace EspInterface.ViewModels
     public class SetupModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        private MainWindow main;
 
         private ICommand _errorConnectingDialog = null;
         public ICommand errorConnectingDialog {
@@ -310,7 +311,6 @@ namespace EspInterface.ViewModels
                     screen3?.Invoke(this, null);
                     //Start connecting with the server
 
-
                     //nel costruttore del serverInterop setto il costruttore del server e lancio server.dosetup()
                     if(thr == null)
                         thr = new ServerInterop(boards, BoardObjs, this);
@@ -390,12 +390,13 @@ namespace EspInterface.ViewModels
                     if (args.Confirmed)
                     {
                         //MessageBox.Show("ok");
+                        main.setupEnded(BoardObjs.ToList());
 
                     }
                     else
                     {
                         //MessageBox.Show("no");
-
+                        main.setupEnded(BoardObjs.ToList());
                     }
 
                     break;
@@ -535,7 +536,7 @@ namespace EspInterface.ViewModels
             return false;
         }
 
-        public SetupModel() {
+        public SetupModel(MainWindow main) {
             this.screen = 1;
             this.Title = "Insert number of boards:";
             this.Subtitle = "Press ok when done";
@@ -546,6 +547,7 @@ namespace EspInterface.ViewModels
             okButton = new RelayCommand(okClick, param => this.ButtonEnabled);
             screen = 1;
             draggingBoardVisibility = "Collapsed";
+            this.main = main;
         }
 
         public void dragNext(int i) {
