@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using EspInterface.ViewModels;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Threading;
 using EspInterface.Models;
 
 namespace EspInterface
@@ -31,6 +32,8 @@ namespace EspInterface
         List<menuItem> listItems;
         List<Board> boards;
         private DebugPhase phase = DebugPhase.monitor;
+
+
 
         public enum DebugPhase
         {
@@ -76,6 +79,9 @@ namespace EspInterface
                     boards[0].posX = 10; boards[0].posY = 10;
                     ObservableCollection<Board> obsBoards = new ObservableCollection<Board>(boards);
                     monitor.boards = obsBoards;
+                    monitor.maxRoomSize = 10;
+                    Thread t = new Thread(debugForceMonitor);
+                    t.Start();
                     break;
 
 
@@ -112,6 +118,39 @@ namespace EspInterface
         private void debugForceMonitor()
         {
 
+            for(int i = 0; i < 20; i++)
+            {
+                //Can be called from a secondary thread
+                monitor.startedScanning();
+                //Simulate scanning room
+                Thread.Sleep(60000);
+                List<Device> newDevices = new List<Device>();
+                Random random = new Random();
+                for(int num = 0; num < 300; num++)
+                {
+                    Device d = new Device(GetRandomMacAddress(), random.NextDouble()*9, random.NextDouble()*9, "00,00,00", "date", "time" );
+                    //MessageBox.Show(d.mac + " " + d.x + " " + d.xInt + " " + d.y + " " + d.yInt);
+                    newDevices.Add(d);
+                }
+                //Simulate Trilateration Calculation
+                Thread.Sleep(100);
+
+                //Must be called from the main thread
+                Application.Current.Dispatcher.Invoke(new Action(() => {
+                    //This will be executed in the main thread
+                    monitor.newData(newDevices);
+                }));
+
+            }
+        }
+
+        public static string GetRandomMacAddress()
+        {
+            var random = new Random();
+            var buffer = new byte[6];
+            random.NextBytes(buffer);
+            var result = String.Concat(buffer.Select(x => string.Format("{0}:", x.ToString("X2"))).ToArray());
+            return result.TrimEnd(':');
         }
 
         private void Window_MouseDown(object sender, MouseButtonEventArgs e) {

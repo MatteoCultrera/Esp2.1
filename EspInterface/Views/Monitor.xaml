@@ -5,8 +5,153 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:EspInterface.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="Blue">
-            
-    </Grid>
+             Loaded="Window_Loaded"
+             Unloaded="Window_Unloaded"
+             d:DesignHeight="575" d:DesignWidth="620">
+    <Canvas Background="#3C4149" x:Name="canvas">
+
+        <Canvas.Resources>
+            <local:roomSize_StringFloatConverter x:Key="roomSize_StringFloatConverter" />
+
+            <Style x:Key="deviceZoom" TargetType="{x:Type CheckBox}">
+                <Setter Property="Width" Value="12"/>
+                <Setter Property="Height" Value="19"/>
+                <Setter Property="Panel.ZIndex" Value="30"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type CheckBox}">
+                            <DockPanel x:Name="dockPanel">
+                                <Canvas Width="24.15" Height="23">
+                                    <Image Source="/Resources/Icons/deviceUnselectedDiscrete.png" x:Name="DeviceImage" Width="12" Height="19" Canvas.Top="4"/>
+                                    <Border x:Name="borderDevice"
+                                            CornerRadius="5"
+                                            Width="20"
+                                            Height="10"
+                                            Background="#222528"
+                                            BorderThickness="0"
+                                            Canvas.Top="1"
+                                            Canvas.Left="4.15">
+                                        <TextBlock x:Name="numBoards"  HorizontalAlignment="Center" VerticalAlignment="Center" Padding=".1" FontSize="8" Foreground="White" Text="{TemplateBinding Content}"/>                                     </Border>
+
+                                    <Canvas.Triggers>
+                                        <EventTrigger RoutedEvent="MouseEnter">
+                                            <EventTrigger.Actions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Width"
+                                                                         Storyboard.TargetName="DeviceImage"
+                                                                         To="19"
+                                                                         />
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Height"
+                                                                         Storyboard.TargetName="DeviceImage"
+                                                                         To="31.5"
+                                                                         />
+
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Width"
+                                                                         Storyboard.TargetName="borderDevice"
+                                                                         To="27"
+                                                                         />
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Height"
+                                                                         Storyboard.TargetName="borderDevice"
+                                                                         To="14"
+                                                                         />
+
+                                                        <DoubleAnimation Duration="0:0:0.200"
+                                                                         Storyboard.TargetProperty="(Canvas.Left)"
+                                                                         Storyboard.TargetName="borderDevice"
+                                                                         To="9.15"/>
+                                                        <DoubleAnimation Duration="0:0:0.200"
+                                                                         Storyboard.TargetProperty="FontSize"
+                                                                         Storyboard.TargetName="numBoards"
+                                                                         To="12"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger.Actions>
+                                        </EventTrigger>
+
+                                        <EventTrigger RoutedEvent="MouseLeave">
+                                            <EventTrigger.Actions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                       
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Width"
+                                                                         Storyboard.TargetName="DeviceImage"
+                                                                         To="12"
+                                                                         />
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Height"
+                                                                         Storyboard.TargetName="DeviceImage"
+                                                                         To="19"
+                                                                         />
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Width"
+                                                                         Storyboard.TargetName="borderDevice"
+                                                                         To="20"
+                                                                         />
+                                                        <DoubleAnimation Duration="0:0:0.200" 
+                                                                         Storyboard.TargetProperty="Height"
+                                                                         Storyboard.TargetName="borderDevice"
+                                                                         To="10"
+                                                                         />
+                                                        <DoubleAnimation Duration="0:0:0.200"
+                                                                         Storyboard.TargetProperty="(Canvas.Left)"
+                                                                         Storyboard.TargetName="borderDevice"
+                                                                         To="4.15"/>
+                                                        <DoubleAnimation Duration="0:0:0.200"
+                                                                         Storyboard.TargetProperty="FontSize"
+                                                                         Storyboard.TargetName="numBoards"
+                                                                         To="8"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger.Actions>
+                                        </EventTrigger>
+                                    </Canvas.Triggers>
+                                </Canvas>
+                            </DockPanel>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="DeviceImage" Property="Source" Value="/Resources/Icons/deviceSelectedDiscrete.png"/>
+                                    <Setter TargetName="numBoards" Property="Foreground" Value="#3FFFD1"/>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter TargetName="DeviceImage" Property="Source" Value="/Resources/Icons/deviceUnselectedDiscrete.png"/>
+                                    <Setter TargetName="numBoards" Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Panel.ZIndex" Value="60"/>
+                    </Trigger>
+                    <Trigger Property="IsMouseOver" Value="False">
+                        <Setter Property="Panel.ZIndex" Value="30"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Canvas.Resources>
+
+        <TextBlock Text="Monitor Phase" FontSize="40" Foreground="#3FFFD1" Canvas.Top="30" Canvas.Left="50"/>
+        <StackPanel Canvas.Left="50" Canvas.Top="111">
+            <TextBlock Text="Scanning Room" Name="title" FontSize="32" Foreground="White" />
+            <TextBlock Text="{Binding subtitle}" FontSize="15" Foreground="#9EA3AA"/>
+        </StackPanel>
+
+        <CheckBox Style="{DynamicResource deviceZoom}" Canvas.Left="80" Canvas.Top="301"></CheckBox>
+        <CheckBox Style="{DynamicResource deviceZoom}" Canvas.Left="106.5" Canvas.Top="301" ></CheckBox>
+        <CheckBox Style="{DynamicResource deviceZoom}" Canvas.Left="80" Canvas.Top="327"></CheckBox>
+
+        <Image Name="grid" Panel.ZIndex="20" Source="/Resources/Icons/Grid.png" Canvas.Top="195" Canvas.Left="50" RenderOptions.BitmapScalingMode="HighQuality" Width="310" Height="310" />
+
+        <TextBlock Canvas.Top="203" Text="{Binding maxRoomSize, Converter={StaticResource roomSize_StringFloatConverter}}" Width="40" Height="14" TextAlignment="Right" FontSize="12" Grid.Row="1" Foreground="#9EA3AA"/>
+        <TextBlock Canvas.Top="470" Text="0 m" Width="40" Height="14" TextAlignment="Right" FontSize="12" Grid.Row="1" Foreground="#9EA3AA"/>
+
+
+    </Canvas>
 </UserControl>
