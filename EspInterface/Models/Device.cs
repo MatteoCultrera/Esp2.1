@@ -17,11 +17,14 @@ namespace EspInterface.Models
         private string _mac;
         private double _x;
         private double _y;
+        private double _xMeters;
+        private double _yMeters;
         private int _xInt;
         private int _yInt;
         private string _timestamp;
         private string _date;
         private string _time;
+        private double scaleFactor;
 
         //Public Fields
         public string mac
@@ -59,6 +62,33 @@ namespace EspInterface.Models
                 {
                     this._y = value;
                     NotifyPropertyChanged("x");
+                }
+            }
+        }
+
+        
+        public double xMeters
+        {
+            get { return this._xMeters; }
+            set
+            {
+                if(this._xMeters != value)
+                {
+                    this._xMeters = value;
+                    NotifyPropertyChanged("xMeters");
+                }
+            }
+        }
+
+        public double yMeters
+        {
+            get { return this._yMeters; }
+            set
+            {
+                if (this._yMeters != value)
+                {
+                    this._yMeters = value;
+                    NotifyPropertyChanged("yMeters");
                 }
             }
         }
@@ -134,7 +164,7 @@ namespace EspInterface.Models
 
 
         //Constructor
-        public Device(string mac, double x, double y, string timestamp, string date, string time)
+        public Device(string mac, double x, double y, string timestamp, string date, string time, int maxRoomSize)
         {
             this._mac = mac;
             this._x = x;
@@ -143,8 +173,24 @@ namespace EspInterface.Models
             this._date = date;
             this._time = time;
 
-            this._xInt = Convert.ToInt32(Math.Round(x));
-            this._yInt = Convert.ToInt32(Math.Round(y));
+            int xI, yI;
+
+            if (x >= 10)
+                xI = 9;
+            else
+                xI = Convert.ToInt32(Math.Floor(x));
+            if (y >= 10)
+                yI = 9;
+            else
+                yI = Convert.ToInt32(Math.Floor(y));
+
+            this._xInt = xI;
+            this._yInt = yI;
+
+            this.scaleFactor = maxRoomSize / 10;
+
+            this._xMeters = this._x * scaleFactor;
+            this._yMeters = this._y * scaleFactor;
 
         }
 

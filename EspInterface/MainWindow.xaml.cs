@@ -126,27 +126,42 @@ namespace EspInterface
                 Thread.Sleep(60000);
                 List<Device> newDevices = new List<Device>();
                 Random random = new Random();
+                
                 for(int num = 0; num < 300; num++)
                 {
-                    Device d = new Device(GetRandomMacAddress(), random.NextDouble()*9, random.NextDouble()*9, "00,00,00", "date", "time" );
+                    Device d = new Device(GetRandomMacAddress(random), random.NextDouble() * 10, random.NextDouble() * 10, "00,00,00", "21/10/19", "16:"+(33+i), monitor.maxRoomSize);
                     //MessageBox.Show(d.mac + " " + d.x + " " + d.xInt + " " + d.y + " " + d.yInt);
                     newDevices.Add(d);
                 }
+
+                /*
+                newDevices.Add(new Device("First"+i, 0.2, 0.4, "00,00,00", "date", "time", monitor.maxRoomSize));
+
+                newDevices.Add(new Device("Second"+i, 3.2, 3.4, "00,00,00", "date", "time", monitor.maxRoomSize));
+
+                newDevices.Add(new Device("Third"+i, 0.2, 4.1, "00,00,00", "date", "time", monitor.maxRoomSize));
                 //Simulate Trilateration Calculation
-                Thread.Sleep(100);
+                Thread.Sleep(100);*/
 
                 //Must be called from the main thread
-                Application.Current.Dispatcher.Invoke(new Action(() => {
-                    //This will be executed in the main thread
-                    monitor.newData(newDevices);
-                }));
+                if (Application.Current.Dispatcher != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        //This will be executed in the main thread
+                        monitor.newData(newDevices);
+                    }));
+                }
+                else
+                {
+                    return;
+                }
 
             }
         }
 
-        public static string GetRandomMacAddress()
+        public static string GetRandomMacAddress(Random random)
         {
-            var random = new Random();
             var buffer = new byte[6];
             random.NextBytes(buffer);
             var result = String.Concat(buffer.Select(x => string.Format("{0}:", x.ToString("X2"))).ToArray());

@@ -272,5 +272,9 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\deviceUnselectedDIscrete.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\backgroundDevicesList.png" />
+    <Resource Include="Resources\Icons\searchMacBackground.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

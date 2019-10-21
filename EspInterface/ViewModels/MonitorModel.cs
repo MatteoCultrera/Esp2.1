@@ -18,7 +18,7 @@ namespace EspInterface.ViewModels
         private ObservableCollection<Board> _boards;
         private String _title;
         private String _subtitle;
-        private double _maxRoomSize;
+        private int _maxRoomSize;
         private List<Device>[][] devicesInGrid = new List<Device>[10][];
         private ObservableCollection<Device> _currentDevicesList;
         private List<Device> totalDevicesList;
@@ -77,7 +77,7 @@ namespace EspInterface.ViewModels
             }
         }
 
-        public double maxRoomSize
+        public int maxRoomSize
         {
             get { return this._maxRoomSize; }
             set
@@ -102,13 +102,22 @@ namespace EspInterface.ViewModels
             totalDevicesList.Clear();
             clearMatrix();
             totalDevicesList = newDevices;
+
             createMatrix(newDevices);
+
+           
 
             newDataAvailable?.Invoke(this, null);
 
             if (currentX == -1 || currentY == -1)
                 return;
 
+        }
+
+        public ObservableCollection<Device> getGridDevices(int x, int y)
+        {
+            ObservableCollection<Device> toReturn = new ObservableCollection<Device>(devicesInGrid[x][y]);
+            return toReturn;
         }
 
         private void clearMatrix()
@@ -123,6 +132,7 @@ namespace EspInterface.ViewModels
             {
                 devicesInGrid[d.xInt][d.yInt].Add(d);
             }
+
         }
 
         
@@ -150,6 +160,18 @@ namespace EspInterface.ViewModels
             roomCheckTimer.Stop();
             counter = 60;
             roomCheckTimer.Start();
+        }
+
+        public int numDevices(int x, int y)
+        {
+            if(devicesInGrid[x][y].Count == 0)
+            {
+                return -1;
+            }
+            else
+            {
+                return devicesInGrid[x][y].Count;
+            }
         }
 
         //Constructor

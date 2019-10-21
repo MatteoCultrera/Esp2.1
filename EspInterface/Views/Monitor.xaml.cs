@@ -25,14 +25,14 @@ namespace EspInterface.Views
     public partial class Monitor : UserControl
     {
         //Private Fields
-        private devicesInGrid[][] devicesMatrix = new devicesInGrid[11][];
+        private devicesInGrid[][] devicesMatrix = new devicesInGrid[10][];
         private static double initialPosX = 80, initialPosY = 100.3;
         private static double offset = 26.45;
 
         public Monitor()
         {
             InitializeComponent();
-            for(int i = 0; i <= 10; i++)
+            for(int i = 0; i < 10; i++)
                 devicesMatrix[i] = new devicesInGrid[10];
 
             for (int i = 0; i < 10; i++)
@@ -63,7 +63,33 @@ namespace EspInterface.Views
                     canvas.Children.Add(devicesMatrix[i][j].deviceCheckbox);
                     devicesMatrix[i][j].deviceCheckbox.Style = style;
                     setPositionsInGrid(devicesMatrix[i][j]);
+                    devicesMatrix[i][j].deviceCheckbox.Click += setChecked;
+                    devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
                 }
+
+        }
+
+        public void setChecked(object o, RoutedEventArgs e)
+        {
+            MonitorModel mm = (MonitorModel)(this.DataContext);
+            CheckBox curr = (CheckBox)o;
+            int x= -1, y = -1;
+
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 10; j++)
+                {
+                    devicesMatrix[i][j].deviceCheckbox.IsChecked = false;
+                    if (devicesMatrix[i][j].deviceCheckbox.Equals(curr))
+                    {
+                        x = devicesMatrix[i][j].x; y = devicesMatrix[i][j].y;
+                    }
+
+                }
+
+
+            curr.IsChecked = true;
+            DevicesLB.ItemsSource = mm.getGridDevices(x, y);
+            
 
         }
 
@@ -131,14 +157,28 @@ namespace EspInterface.Views
 
             firstFading.Begin();
 
+            updateBoarGrid();
+
 
         }
 
         private void updateBoarGrid()
         {
-            //for (int i = 0; i <= 10; i++)
-                //for (int j = 0; j <= 10; j++)
-                    //devicesMatrix[i, j].numDevices = -1;
+
+            MonitorModel mm = (MonitorModel)(this.DataContext);
+
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 10; j++)
+                {
+                    devicesMatrix[i][j].numDevices = mm.numDevices(i, j);
+                    if (devicesMatrix[i][j].numDevices != -1)
+                    {
+                        devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
+                        devicesMatrix[i][j].deviceCheckbox.Content = devicesMatrix[i][j].numDevices + "";
+                    }
+                    else
+                        devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
+                }
 
 
         }
@@ -165,7 +205,41 @@ namespace EspInterface.Views
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return String.Format("{0:##.###} m", value);
+            return String.Format("{0:##} m", value);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string stringType = (string)value;
+            string stringValue = stringType.Split(' ')[0];
+            int returnVal;
+            Int32.TryParse(stringValue, out returnVal);
+            return returnVal;
+        }
+    }
+
+    public class xDevicePosition_StringFloatConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return String.Format("x: {0:##.##}", value);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string stringType = (string)value;
+            string stringValue = stringType.Split(' ')[0];
+            double returnVal;
+            Double.TryParse(stringValue, out returnVal);
+            return returnVal;
+        }
+    }
+
+    public class yDevicePosition_StringFloatConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return String.Format("y: {0:##.##}", value);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

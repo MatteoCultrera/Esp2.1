@@ -410,7 +410,6 @@
                 </Setter>
             </Style>
 
-
             <Style x:Key="customSlider" TargetType="{x:Type Slider}">
                 <Setter Property="Template">
                     <Setter.Value>
