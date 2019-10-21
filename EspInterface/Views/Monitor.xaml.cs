@@ -158,7 +158,7 @@ namespace EspInterface.Views
             firstFading.Begin();
 
             updateBoarGrid();
-
+            
 
         }
 
@@ -171,6 +171,21 @@ namespace EspInterface.Views
                 for (int j = 0; j < 10; j++)
                 {
                     devicesMatrix[i][j].numDevices = mm.numDevices(i, j);
+                    if(devicesMatrix[i][j].deviceCheckbox.IsChecked == true)
+                    {
+                        if (devicesMatrix[i][j].numDevices != -1)
+                        {
+                            devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
+                            devicesMatrix[i][j].deviceCheckbox.Content = devicesMatrix[i][j].numDevices + "";
+                            DevicesLB.ItemsSource = mm.getGridDevices(i, j);
+                        }
+                        else
+                        {
+                            devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
+                            DevicesLB.ItemsSource = null;
+                         }
+                        break;
+                    }
                     if (devicesMatrix[i][j].numDevices != -1)
                     {
                         devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
