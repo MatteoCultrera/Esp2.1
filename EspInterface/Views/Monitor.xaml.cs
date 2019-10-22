@@ -15,7 +15,9 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Text.RegularExpressions;
 using EspInterface.ViewModels;
+using EspInterface.Models;
 
 namespace EspInterface.Views
 {
@@ -28,6 +30,7 @@ namespace EspInterface.Views
         private devicesInGrid[][] devicesMatrix = new devicesInGrid[10][];
         private static double initialPosX = 80, initialPosY = 100.3;
         private static double offset = 26.45;
+        private List<boardsInGrid> boards = new List<boardsInGrid>();
 
         public Monitor()
         {
@@ -67,6 +70,28 @@ namespace EspInterface.Views
                     devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
                 }
 
+            List<Board> modelBoards = mm.getBoards();
+
+            foreach(Board b in modelBoards)
+            {
+                boardsInGrid bing = new boardsInGrid();
+                bing.b = b;
+                bing.boardImage = new Image();
+                bing.boardImage.Source = new BitmapImage(new Uri("/Resources/Icons/boardDevice.png", UriKind.Relative));
+                bing.boardImage.Width = 12;
+                bing.boardImage.Height = 12;
+              
+                canvas.Children.Add(bing.boardImage);
+                Panel.SetZIndex(bing.boardImage, 25);
+
+                //initialPosX = 55.2, initialPosY = 110.3;
+
+                Canvas.SetLeft(bing.boardImage, 66.6 + offset * bing.b.posX);
+                Canvas.SetBottom(bing.boardImage, 86.6 + offset * bing.b.posY);
+
+                boards.Add(bing);
+            }
+
         }
 
         public void setChecked(object o, RoutedEventArgs e)
@@ -100,7 +125,9 @@ namespace EspInterface.Views
             mm.newDataAvailable -= newData;
         }
 
-        private void newData(object sender, EventArgs e)
+        
+
+            private void newData(object sender, EventArgs e)
         {
             TimeSpan timing = new TimeSpan(0, 0, 0, 0, 400);
             TimeSpan secondAnim = new TimeSpan(0, 0, 4);
@@ -204,15 +231,140 @@ namespace EspInterface.Views
             Canvas.SetBottom(device.deviceCheckbox, initialPosY + offset * device.y);
         }
 
+        private void handleTextMAC(object sender, TextCompositionEventArgs e)
+        {
+            TextBox box = sender as TextBox;
+            Regex regex = new Regex("^[a-fA-F0-9:]*$");
+
+            string text = box.GetLineText(0);
+
+            if (box.GetLineLength(0) > 16)
+            {
+                e.Handled = true;
+                return;
+            }
+
+            
+
+            e.Handled = !regex.IsMatch(e.Text);
+        }
+
+        private void handleKeyMAC(object sender, KeyEventArgs e)
+        {
+            TextBox box = sender as TextBox;
+
+            if (e.Key == Key.Enter)
+            {
+               
+                ClearFocus.Focus();
+            }
+
+        }
+
+        private void mac_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox box = sender as TextBox;
+            Regex regex = new Regex("^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$");
+
+         
+
+            if (regex.IsMatch(box.Text)){
+                
+            }
+            else
+            {
+                
+                showErrorMessage("Wrong MAC");
+            }
+
+        }
+
+        private void mac_GotFocus(object sender, RoutedEventArgs e)
+        {
+            ((TextBox)sender).Text = "";
+        }
+
+        private void showErrorMessage(string message)
+        {
+            MacTextBox.Focusable = false;
+            TimeSpan timing = new TimeSpan(0, 0, 0, 0, 200);
+            TimeSpan secondAnim = new TimeSpan(0, 0, 2);
+
+            DoubleAnimation fadeOut1 = new DoubleAnimation
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(200)
+            };
+            DoubleAnimation fadeIn1 = new DoubleAnimation
+            {
+                To = 1,
+                Duration = timing
+            };
+            DoubleAnimation fadeOut2 = new DoubleAnimation
+            {
+                BeginTime = secondAnim,
+                To = 0,
+                Duration = timing
+            };
+            DoubleAnimation fadeIn2 = new DoubleAnimation
+            {
+                To = 1,
+                Duration = timing
+            };
+
+            Storyboard firstFading = new Storyboard();
+            Storyboard secondFading = new Storyboard();
+            Storyboard thirdFading = new Storyboard();
+
+            firstFading.Children.Add(fadeOut1);
+            secondFading.Children.Add(fadeIn1);
+            secondFading.Children.Add(fadeOut2);
+            thirdFading.Children.Add(fadeIn2);
+
+            Storyboard.SetTarget(firstFading, MacTextBox);
+            Storyboard.SetTargetProperty(firstFading, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard.SetTarget(secondFading, MacTextBox);
+            Storyboard.SetTargetProperty(secondFading, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard.SetTarget(thirdFading, MacTextBox);
+            Storyboard.SetTargetProperty(thirdFading, new PropertyPath(Control.OpacityProperty));
+
+            firstFading.Completed += (s, a) => {
+               
+                MacTextBox.Foreground = new System.Windows.Media.SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF623F"));
+                MacTextBox.Text = message;
+                secondFading.Begin();
+            };
+
+            secondFading.Completed += (s, a) => {
+                MacTextBox.Foreground = new System.Windows.Media.SolidColorBrush((Color)ColorConverter.ConvertFromString("#707070"));
+                MacTextBox.Text = "Search MAC";
+                thirdFading.Begin();
+            };
+
+            thirdFading.Completed += (s, a) => {
+                MacTextBox.Focusable = true;
+            };
+
+            firstFading.Begin();
+        }
+
 
     }
 
-    //Helper Class to Handle Devices in Grid
+    //Helper Classes
     public class devicesInGrid
     {
         public int x, y;
         public int numDevices;
         public CheckBox deviceCheckbox;
+    }
+
+    public class boardsInGrid
+    {
+        public Board b;
+        public Image boardImage;
     }
 
     //Code for Value Converters

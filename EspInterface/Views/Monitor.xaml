@@ -33,7 +33,8 @@
                                             BorderThickness="0"
                                             Canvas.Top="1"
                                             Canvas.Left="4.15">
-                                        <TextBlock x:Name="numBoards"  HorizontalAlignment="Center" VerticalAlignment="Center" Padding=".1" FontSize="8" Foreground="White" Text="{TemplateBinding Content}"/>                                     </Border>
+                                        <TextBlock x:Name="numBoards"  HorizontalAlignment="Center" VerticalAlignment="Center" Padding=".1" FontSize="8" Foreground="White" Text="{TemplateBinding Content}"/>
+                                    </Border>
 
                                     <Canvas.Triggers>
                                         <EventTrigger RoutedEvent="MouseEnter">
@@ -79,7 +80,7 @@
                                             <EventTrigger.Actions>
                                                 <BeginStoryboard>
                                                     <Storyboard>
-                                                       
+
                                                         <DoubleAnimation Duration="0:0:0.200" 
                                                                          Storyboard.TargetProperty="Width"
                                                                          Storyboard.TargetName="DeviceImage"
@@ -334,7 +335,35 @@
             </Grid.OpacityMask>
         </Grid>
 
-        
-        
+       
+        <Image Source="/Resources/Icons/searchMacBackground.png" Width="180" Height="30"
+               Canvas.Left="400" Canvas.Top="155"/>
+
+        <StackPanel Orientation="Horizontal" Canvas.Left="400" Canvas.Top="155" Width="180" Height="30">
+            <Image Source="/Resources/Icons/searchIcon.png" Width="13" Margin="14, 0, 7, 0"/>
+            <TextBox Name="MacTextBox"
+                     Width="134" 
+                     FontSize="14" 
+                     Foreground="#707070" 
+                     Text="Search MAC"
+                     Background="Transparent" 
+                     TextAlignment="Left" 
+                     VerticalAlignment="Center" 
+                     BorderThickness="0"
+                     CharacterCasing="Upper"
+                     PreviewTextInput="handleTextMAC"
+                     LostFocus="mac_LostFocus"
+                     GotFocus="mac_GotFocus"
+                     PreviewKeyDown="handleKeyMAC"
+                     Margin="0, 0, 0, 2"
+                     />
+        </StackPanel>
+
+        <Label Name="ClearFocus" Focusable="True" FocusVisualStyle="{x:Null}"/>
+
+
+
+
+
     </Canvas>
 </UserControl>

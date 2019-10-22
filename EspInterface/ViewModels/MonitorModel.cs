@@ -45,9 +45,12 @@ namespace EspInterface.ViewModels
             set
             {
                 if (value != this._boards)
+                {
                     _boards = value;
-                setBoardsPositions();
-                this.NotifyPropertyChanged("boards");
+
+                    this.NotifyPropertyChanged("boards");
+                }
+                
             }
         }
 
@@ -93,8 +96,10 @@ namespace EspInterface.ViewModels
         public event EventHandler<EventArgs> newDataAvailable;
 
         //Methods
-        public void setBoardsPositions() {
-            
+
+        public List<Board> getBoards()
+        {
+            return boards.ToList();
         }
 
         public void newData(List<Device> newDevices)
@@ -198,5 +203,6 @@ namespace EspInterface.ViewModels
 
     }
 
-    //Classes For Data Conversion
+    //Classes For Data Passing through Events
+
 }
