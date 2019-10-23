@@ -26,25 +26,6 @@ namespace EspInterface.Models
         private string _time;
         private double scaleFactor;
 
-        public Device(string Mac, int posX, int posY)
-        {
-            this.Mac = Mac;
-            this.posX = posX;
-            this.posY = posY;
-        }
-
-        public int setPosx
-        {
-            get { return this._y; }
-            set
-            {
-                if (this._y != value)
-                {
-                    this._y = value;
-                    NotifyPropertyChanged("x");
-                }
-            }
-        }
 
         
         public double xMeters
