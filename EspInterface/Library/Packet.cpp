@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Packet.h"
 
+using namespace std;
+
 Packet::Packet()
 {
 }
@@ -50,6 +52,53 @@ void Packet::setCRC(uint8_t t[4]) {
 
 void Packet::setBoardMac(std::string MAC) {
 	this->board_mac = MAC;
+}
+
+/*getter*/
+string Packet::get_board_mac()
+{
+	return this->board_mac;
+}
+string Packet::get_device_addr()
+{
+	char cAddr[30];
+	sprintf_s(cAddr, "%02x:%02x:%02x:%02x:%02x:%02x", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+	return string(cAddr);
+}
+int8_t Packet::get_rssi()
+{
+	return this->rssi;
+}
+uint64_t Packet::get_timestamp()
+{
+	return this->timestamp;
+}
+string Packet::get_seq_ctl()
+{
+	char seq[16];
+	sprintf_s(seq, "%02x%02x", seq_ctl[0], seq_ctl[1]);
+	return string(seq);
+}
+
+void Packet::printPacket() 
+{
+	fprintf(stdout, "Board Mac=%s ----> %" PRIu64 " PROBE CHAN=%02d,  SEQ=%02x%02x,  RSSI=%02d, "
+		" ADDR=%02x:%02x:%02x:%02x:%02x:%02x,  ",
+		board_mac.c_str(),
+		timestamp,
+		channel,
+		seq_ctl[0], seq_ctl[1],
+		rssi,
+		addr[0], addr[1], addr[2],
+		addr[3], addr[4], addr[5]
+	);
+	fprintf(stdout, "SSID=");
+	for (int i = 0; i < ssid_length; i++)
+		fprintf(stdout, "%c", (char)ssid[i]);
+	fprintf(stdout, "  CRC=");
+	for (int i = 0; i < 4; i++)
+		fprintf(stdout, "%02x", crc[i]);
+	fprintf(stdout, "\n");
 }
 
 void Packet::printFile(FILE *fd) {

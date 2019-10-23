@@ -35,7 +35,6 @@ NativeObject::NativeObject(int value) : value_(value)
 	/* Try to setup the server until success */ 
 	while (result == 0) {
 		server = new Server(value_); //qui passo al server il NUMBER_ESP dell'interfaccia
-		pkt = new PacketQueue();
 		result = server->doSetup(); //faccio la dosetup, la prossim chiamata al server e la acceptboard, e successivamente la servergo
 		ofstream serverlog;
 		serverlog.open("serverlog.txt");
@@ -70,7 +69,6 @@ NativeObject::checkMacAddr()
 void
 NativeObject::getDevices()
 {
-	vector<Dispositivo>* devices = server->getDevices();
 	//qua devo far tornare gli address dei dispositivi e le relative coordinate
 }
 
@@ -115,7 +113,8 @@ NativeObject::set_board_user(char *macAddr, int posx, int posy)
 void
 NativeObject::serverGo() 
 {
-	server->serverGo(*pkt,boardsVect);
+	cout << "nativeobj->servergo" << endl;
+	server->serverGo(pkt,boardsVect);
 }
 
 void
@@ -129,29 +128,36 @@ NativeObject::printBoardList()
 	}
 }
 
-int 
-NativeObject::getDevicesAndPos(char* listOfMac, int* listOfPosX, int* listOfPosY)
-{
-	return 0;
-}
+//int 
+//NativeObject::getDevicesAndPos(char* listOfMac, int* listOfPosX, int* listOfPosY, int *nDevices)
+//{
+	/*
+	cout << "entering getDeviceAndPos" << endl;
+	string tmp = NULL;
+	int i = 0;
+	//prendo i valori dei dispositivi trovati alla fine della trilateration
+	vector<Dispositivo> &tmpDevices = server->getDevices(); 
 
+	*nDevices = tmpDevices.size();
+	
+	
+	for (Dispositivo dev : tmpDevices) 
+	{
+		if (i == 0)
+			tmp = dev.getMAC(); // alla prima lettura non avrò "," prima del MacAddr del dispositivo
+		else
+			tmp += ',' + dev.getMAC();
+		listOfPosX[i] = dev.getX();
+		listOfPosY[i] = dev.getY();
+		i++;
+	}
+	//copio nell'area di memoria puntata da listOfMac la stringa tmp
+	strcpy_s(listOfMac, tmp.size()+1 ,tmp.c_str());
+	*/
+	//return 0;
 
-//TODO HERE:
-	/* server launch
-		//creo un vettore di board per il server, con le board appena create
-			std::vector<Board> boards(value_);
-			for each (Board b in BoardObjs) {
-				boards[i] = b;
-			}
+//}
 
-			/* Start Server Functionalities */
-			/*			server.serverGo(value_);
-
-						cout << "Closing the server" << std::endl;
-						*/
-
-//metodo get position finali per l'interfaccia
-//metodo che lancia server 
 
 
 

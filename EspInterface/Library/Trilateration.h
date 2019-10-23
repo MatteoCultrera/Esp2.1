@@ -3,7 +3,9 @@
 #include <vector>
 #include "Dispositivo.h"
 #include "Misura.h"
+#include "PacketQueue.h"
 #include "Board.h"
+#include "Packet.h"
 
 class Trilateration
 {
@@ -25,7 +27,7 @@ public:
 	Trilateration(vector<Board>(&boards));
 	~Trilateration() {};
 
-	void scanFile();
-	vector<Dispositivo>* calcCoords();
+	void scanFile(PacketQueue &pq);
+	vector<Dispositivo>& calcCoords();
 	
 };

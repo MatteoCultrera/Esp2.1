@@ -6,13 +6,15 @@
 #include <mutex>
 #include <thread>
 #include "Trilateration.h"
+#include "Funzioni_db.h"
 
 using namespace std;
 
 int nameCount = 1;
 int NUMBER_ESP;
 
-vector<Dispositivo>* devicesFound = NULL;
+vector<Dispositivo> devicesFound;
+mutex mtx;
 
 HANDLE smWrite;
 DWORD bytesWritten;
@@ -31,49 +33,71 @@ bool WriteSharedMemoryArea(string macToSend,int timeout)
 		return true;
 }
 
-void setTrilateration(vector<Board>boards)
+void Server::setTrilateration(PacketQueue &pq, vector<Board>(&boards))
 {
 	//TODO controllare il caso in cui boards sia nullo 
+	cout << "trilateration thread t1 started " << endl;
+	Trilateration tr(boards);
 
-	Trilateration tr= Trilateration(boards);
-	vector<Dispositivo>* tmpDevicesFound;
-
-	/* Per adesso infinito ma dovrebbe esserci qualche variabile di controllo per sapere quando va chiuso */
-	while (1) 
+	/* Per adesso infinito ma dovrebbe esserci qualche variabile di controllo per sapere quando va chiuso, in teoria quando finisce la serverGo() */
+	while (1)
 	{
 		/* Aspetto che il file sia pronto */
+		cout << "T: waiting for sfull" << endl;
 		WaitForSingleObject(sFull, INFINITE);
-
+		cout << "T: scan file" << endl;
 		/* Leggo il file */
-		tr.scanFile();
-
+		tr.scanFile(pq);
+		cout << "T: releasing semaphore" << endl;
 		/* Sveglio il server */
 		ReleaseSemaphore(sEmpty, 1, NULL);
 
 		/* Calcolo le coordinate dei dispositivi */
 
-		tmpDevicesFound = tr.calcCoords();
+		vector<Dispositivo> &tmpDevicesFound = tr.calcCoords();
 
-		//acquisisco mutex
-		devicesFound = tmpDevicesFound;
-		//rilascio mutex
 
+
+		cout << "T: wait for mutex" << endl;
+		/* prendo mutex per non riempire il vettore mentre l'interfaccia sta prendendo i valori dallo stesso*/
+		mtx.lock();
+
+
+
+		devicesFound.clear();
+		for (auto v : tmpDevicesFound)
+		{
+			devicesFound.push_back(v);
+		}
+
+
+
+		cout << "T: release mutex" << endl;
+		/*release mutex*/
+		mtx.unlock();
 
 	}
-	
 }
 
-vector<Dispositivo>*
+/*
+vector<Dispositivo>&
 Server::getDevices() 
 {
-	vector<Dispositivo>* tmpDevices;
+	vector<Dispositivo> tmpDevices;
+	cout << "entering server->getDevices" << endl;
+	//acquisco mutex per passare il vettore di disp. trovati a interfaccia
+	mtx.lock();
 
-	//acquisisco mutex
-	tmpDevices = devicesFound;
-	//rilascio mutex
+	for (auto v : devicesFound)
+	{
+		tmpDevices.push_back(v);
+	}
+	mtx.unlock();
 
 	return tmpDevices;
 }
+*/
+
 
 Server::Server() {
 }
@@ -95,7 +119,14 @@ Server::Server(int number)
 	/*creo i semafori per la trilaterazione*/
 	sFull = CreateSemaphore(NULL, 0, 1, NULL);
 	sEmpty = CreateSemaphore(NULL, 0, 1, NULL);
-
+	/*conn = ConnectDB();
+	if (!conn)
+	{
+		cout << "Errore durante la setupDB: " << mysql_error(conn) << endl;
+		WSResult = 0;
+		//mysql_close(conn); when we need to shut down the db conn
+	}*/
+	cout << "Connessione Server e DB eseguita con successo\n";
 }
 
 void handler(int signo) {
@@ -177,11 +208,15 @@ int Server::doSetup() {
 }
 
 
-int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
-	//cout << "entering serverGo" << endl;
-	
+int Server::serverGo(PacketQueue &pq, vector<Board>&boards) {
+	cout << "entering serverGo" << endl;
+	/*if (InsertDB(conn, "mac:di:prova", 1.003, 3.001))//, 123456))
+	{
+		cout << "Errore nella query INSERT" << endl;
+	}*/
+
 	/*inizio il set della trilaterazione*/
-	thread t1(setTrilateration, boards);
+	thread t1(&Server::setTrilateration, this, std::ref(pq), std::ref(boards));
 	
 	/*for (auto v : boards)
 	{
@@ -228,8 +263,13 @@ int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
 }
 
 int Server::serverLoop(vector<Board>boards, bool& firstFlag, bool& secondFlag, int value, bool& setUpFlag, bool& sniffingFlag, PacketQueue &pq) {
-	//cout << "entering serverLoop" << endl;
+	cout << "entering serverLoop " << endl;
 	int sendRes, recvRes;
+
+	/*if (SelectDB(conn))
+	{
+		cout << "Errore nella query SELECT" << endl;
+	}*/
 
 	/* Avoids the recv Packet at the first iteration */
 	if (firstFlag) {
@@ -594,7 +634,12 @@ int Server::recvPacketsSeq(vector<Board>boards, PacketQueue &pq) {
 
 	/* DELETE WHEN NO MORE NECESSARY */
 	//nameCount++;
-
+	/*ha finito di riempire la coda di pacchetti con le rilevazioni delle n schedine, può partire la trilaterazione*/
+	ReleaseSemaphore(sFull, 1, NULL);
+	cout << "S:sfull released, wait for sempty" << endl;
+	/*attendo che trilateration prenda tutti i dati dalla packetqueue*/
+	WaitForSingleObject(sEmpty, INFINITE);
+	cout << "S:sempty acquired by server, serverloop again" << endl;
 	return res;
 }
 
@@ -745,10 +790,6 @@ int Server::recvPseq(SOCKET s, string MAC, FILE *fd, PacketQueue &pq) {
 		// DELETE WHEN NO MORE NECESSARY
 		p.printFile(fd);
 	}
-
-	ReleaseSemaphore(sFull, 1, NULL);
-	WaitForSingleObject(sEmpty, INFINITE);
-
 	return 1;
 }
 

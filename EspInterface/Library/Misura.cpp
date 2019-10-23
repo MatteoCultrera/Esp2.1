@@ -56,3 +56,8 @@ bool Misura::operator>(const Misura& m)const
 {
 	return m < *this;
 }
+
+void Misura::setSchedaptr(Board* sPtr)
+{
+	Schedaptr = sPtr;
+}

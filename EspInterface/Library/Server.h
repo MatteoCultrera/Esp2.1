@@ -1,8 +1,10 @@
 #pragma once
+#include <mutex>
 #include "PacketQueue.h"
 #include "Board.h"
 #include "Packet.h"
 #include "Dispositivo.h"
+#include <mysql.h>
 
 class Server
 {
@@ -10,7 +12,6 @@ class Server
 	SOCKET passive_socket;
 	int WSResult = 1;
 	int NUMBER_ESP;
-
 	void showAddr(const char * s, struct sockaddr_in *a, string MAC);
 	int AcceptConnections(vector<Board>(&boards), int passive_socket, bool &sniffingFlag, bool &secondFlag);
 	void closeConnections(vector<Board>(&boards));
@@ -22,6 +23,8 @@ class Server
 	int serverLoop(vector<Board>boards, bool& firstFlag, bool& secondFlag, int value, bool& setUpFlag, bool& sniffingFlag, PacketQueue &pq);
 	int recvMAC(vector<Board>(&boards));
 	
+
+	
 public:
 	Server();
 	Server(int number);
@@ -29,7 +32,10 @@ public:
 	int doSetup();
 	int serverGo(PacketQueue &pq, vector<Board>(&boards));
 	int acceptBoard(vector<Board>(&boards));
+	void setTrilateration(PacketQueue &pq, vector<Board>(&boards));
 	vector<int> boardsIndexConnected;
-	vector<Dispositivo>* getDevices();
+	vector<Dispositivo>& getDevices();
+	MYSQL* conn;
+	
 };
 

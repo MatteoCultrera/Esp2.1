@@ -15,6 +15,7 @@ public:
 	~Misura();
 	Misura(const Misura& misura);
 
+	void setSchedaptr(Board* sPtr);
 	double getRssi();
 	double getDistanza();
 	const char* getMACaddrScheda();

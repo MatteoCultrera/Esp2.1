@@ -31,7 +31,7 @@ namespace EspInterface
 
         List<menuItem> listItems;
         List<Board> boards;
-        private DebugPhase phase = DebugPhase.monitor;
+        private DebugPhase phase = DebugPhase.setup;
 
 
 

@@ -31,7 +31,11 @@ namespace EspInterface.ViewModels
         private int res;
         private List<int> nToConnBoards;
         SetupModel instance;
-        
+
+        private char[] listOfMac = null;
+        private int[] listOfPosX = null;
+        private int[] listOfPosY = null;
+        private IntPtr nDevices;
 
 
         public ServerInterop(int boards, ObservableCollection<Board> BoardObjs, SetupModel instance)
@@ -58,7 +62,7 @@ namespace EspInterface.ViewModels
                 myObj.set_board_toCheck(c);
             }
 
-            while (nToConnBoards.Count != 0)
+            while (nToConnBoards.Count != 0) /*controlla fino a quando non sono connesse tutte le schedine o fino al timeout , evito loop */
             {
                 res = myObj.checkMacAddr();
 
@@ -72,62 +76,49 @@ namespace EspInterface.ViewModels
                 }
                 else if (res == -1 && Application.Current != null)
                 {
-                    foreach (int i in nToConnBoards)
+                    foreach (int i in nToConnBoards) /* chiamo la error per ogni schedina ancora presente nella lista di interi*/
                     {
                         Application.Current.Dispatcher.Invoke(new Action(() =>
                         {
                             instance.errorBoard(BoardObjs[i].MAC);
                         }));
-                        break;
+
                     }
-                }
-            }
-
-            /*
-            foreach (Board b in BoardObjs)
-            {
-
-                res = myObj.checkMacAddr();
-
-                if (res == 0 && Application.Current != null)
-                {
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
-                        //This will be executed in the main thread
-                        instance.boardConnected(b.MAC);
-                    }));
-               
-                }
-                else if (Application.Current != null)
-                {
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
-                        instance.errorBoard(b.MAC);
-                    }));
-                    //instance.errorBoard(b.MAC);
-
                     break;
                 }
-            }*/
+            }
         }
 
-      /*  
-       *  VERSIONE CON CALLBACK(PUò SEMPRE SERVIRE PER DOPO
-       *  public ServerInterop(SetupModel.ExampleCallback callbackDelegate, int boards, ObservableCollection<Board> BoardObjs)
-        {
-            callback = callbackDelegate;
-            this.boards = boards;
-            this.BoardObjs = new ObservableCollection<Board>(BoardObjs);
-            myObj = new ManagedObject(boards); //send number of boards
-            sharedArea = MemoryMappedFile.CreateNew("MAC_FOUND", sizeof(char)*12);  // ho creato la shared memory per passare i mac trovati
-            sharedAreaVS = sharedArea.CreateViewStream();// si apre la sm come se fosse un file
-            checkMac = new Mutex(false, "MAC_ADDR_MUTEX");
-        }*/
-            //this class and its methods are the ones called by the c# thread in setupModel. The Thread runs all server functions ! 
+                public void updateDevicePos() //chiamata in serverinterop.servergo
+                {
+ /*                   int res;
+                    char[] delimiter = { ',' };
+                    String[] lMac;
 
+                    if (DeviceObjs.Count != 0) // se sto mandando la n-esima lista di dispostivi trovati, pulisco prima la collection precedente
+                        DeviceObjs.Clear();
 
-        public void UpdateDevicePos(string MacDevice, int x, int y)
-        {
-            
-        }
+                    res = myObj.getDeviceAndPos(listOfMac, listOfPosX, listOfPosY, nDevices);
+                    if (res != 0)
+                    {
+                        Debug.WriteLine("getDeviceAndPos error");
+                    }
+                    lMac = (new String(listOfMac)).Split(delimiter);
+                    for (int i = 0; i < nDevices.ToInt32(); i++)
+                    {
+                        Device dev = new Device(lMac[i], listOfPosX[i], listOfPosY[i]);
+                        DeviceObjs.Add(dev);
+                    }
+                   //a questo punto disegno i dispositivi rilevati chiamando un evento presente in monitor, es: 
+
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                                //instance.drawDevice();
+                            }));
+
+*/
+                }
+
 
         public void ServerGo()
         {
@@ -142,8 +133,7 @@ namespace EspInterface.ViewModels
             myObj.serverGo();
             //to do:
             //sleep 60 sec
-            //call myobj.devicesfound 
-            //callback (<list>macdevice,posx,posy) to draw the device found
+            //updateDevicePos();
             //sleep 60
         }
     }

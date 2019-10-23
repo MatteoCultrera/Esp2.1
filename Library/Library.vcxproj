@@ -86,6 +86,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Program Files\MySQL\MySQL Connector C++ 1.1.12\include;C:\Program Files\MySQL\MySQL Server 8.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -95,6 +96,10 @@
       <Command>
       </Command>
     </PreBuildEvent>
+    <Link>
+      <AdditionalLibraryDirectories>C:\Program Files\MySQL\MySQL Connector C++ 1.1.12\lib\opt;C:\Program Files\MySQL\MySQL Server 8.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mysqlcppconn.lib;libmysql.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -134,6 +139,9 @@
   <ItemGroup>
     <ClInclude Include="..\EspInterface\Library\Board.h" />
     <ClInclude Include="..\EspInterface\Library\Dispositivo.h" />
+    <ClInclude Include="..\EspInterface\Library\Funzioni_db.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\EspInterface\Library\Misura.h" />
     <ClInclude Include="..\EspInterface\Library\NativeObject.h" />
     <ClInclude Include="..\EspInterface\Library\NativeWrapper.h" />
@@ -146,6 +154,9 @@
   <ItemGroup>
     <ClCompile Include="..\EspInterface\Library\Board.cpp" />
     <ClCompile Include="..\EspInterface\Library\Dispositivo.cpp" />
+    <ClCompile Include="..\EspInterface\Library\Funzioni_db.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\EspInterface\Library\Misura.cpp" />
     <ClCompile Include="..\EspInterface\Library\NativeObject.cpp" />
     <ClCompile Include="..\EspInterface\Library\NativeWrapper.cpp" />
