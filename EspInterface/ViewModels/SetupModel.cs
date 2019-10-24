@@ -14,6 +14,7 @@ using EspInterface.Models;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Data.SqlClient;
 
 namespace EspInterface.ViewModels
 {
@@ -289,7 +290,28 @@ namespace EspInterface.ViewModels
             switch (screen) {
                 case 1:
                     screen = 2;
-                
+/*                  //TO DO LATER- DO NOT DELETE
+                    //string badgeNum;
+                    // string sql = "SELECT * FROM test"; //SELECT BadgeNum FROM tableOfficeInfo WHERE BadgeNum = @BadgeNum";
+                    using (SqlConnection conn = new SqlConnection("Data Source = (local); Initial Catalog = progetto_pds; "+ "Integrated Security=SSPI;User ID=root;Password=1234"))
+                    {
+                        SqlCommand cmd = new SqlCommand("SELECT * FROM test", conn);
+                        //cmd.Parameters.AddWithValue("@BadgeNum", 1);
+                        try
+                        {
+                            conn.Open();
+                            SqlDataReader reader = cmd.ExecuteReader();
+                            while (reader.Read())
+                                Debug.WriteLine("{0} {1} {2}", reader.GetString(0), reader.GetDouble(1), reader.GetDouble(2));
+                            Debug.WriteLine("tutto ok");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex.Message);
+                        }
+                    }
+*/
+
                     numBoards = "";
                     Title = "Insert Boards MAC";
                     Subtitle = "You can also change board's names";

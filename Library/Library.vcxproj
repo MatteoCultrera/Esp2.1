@@ -140,7 +140,7 @@
     <ClInclude Include="..\EspInterface\Library\Board.h" />
     <ClInclude Include="..\EspInterface\Library\Dispositivo.h" />
     <ClInclude Include="..\EspInterface\Library\Funzioni_db.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\EspInterface\Library\Misura.h" />
     <ClInclude Include="..\EspInterface\Library\NativeObject.h" />
@@ -155,7 +155,7 @@
     <ClCompile Include="..\EspInterface\Library\Board.cpp" />
     <ClCompile Include="..\EspInterface\Library\Dispositivo.cpp" />
     <ClCompile Include="..\EspInterface\Library\Funzioni_db.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\EspInterface\Library\Misura.cpp" />
     <ClCompile Include="..\EspInterface\Library\NativeObject.cpp" />
