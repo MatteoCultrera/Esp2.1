@@ -227,7 +227,7 @@ int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
 }
 
 int Server::serverLoop(vector<Board>boards, bool& firstFlag, bool& secondFlag, int value, bool& setUpFlag, bool& sniffingFlag, PacketQueue &pq) {
-	//cout << "entering serverLoop" << endl;
+	
 	int sendRes, recvRes;
 
 	/* Avoids the recv Packet at the first iteration */
@@ -562,7 +562,7 @@ void Server::showAddr(const char * s, struct sockaddr_in *a, string MAC)
 
 /*					Reciving packet sequentially					*/
 int Server::recvPacketsSeq(vector<Board>boards, PacketQueue &pq) {
-	cout << "entering recvPacketSeq" << endl;
+	
 	int res = 1;
 	//Sleep(10000);
 	/* DELETE WHEN NO MORE NECESSARY */
@@ -599,7 +599,7 @@ int Server::recvPacketsSeq(vector<Board>boards, PacketQueue &pq) {
 
 /*					Receving packets fragmented    					*/
 int Server::recvPseq(SOCKET s, string MAC, FILE *fd, PacketQueue &pq) {
-	cout << "entering recvPseq" << endl;
+	
 	uint32_t numP;
 	unsigned char netP[4];
 	int cwrite;
@@ -696,7 +696,7 @@ int Server::recvPseq(SOCKET s, string MAC, FILE *fd, PacketQueue &pq) {
 		}
 
 		Packet p;
-
+		
 		uint64_t timestamp;
 		timestamp = NTOHLL(*(uint64_t*)ts);
 		p.setTimestamp(timestamp);
@@ -744,7 +744,7 @@ int Server::recvPseq(SOCKET s, string MAC, FILE *fd, PacketQueue &pq) {
 		// DELETE WHEN NO MORE NECESSARY
 		p.printFile(fd);
 	}
-
+	cout << "\t\tDo stuff" << endl;
 	ReleaseSemaphore(sFull, 1, NULL);
 	WaitForSingleObject(sEmpty, INFINITE);
 
