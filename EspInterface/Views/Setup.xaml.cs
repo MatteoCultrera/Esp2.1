@@ -32,6 +32,7 @@ namespace EspInterface.Views
     static class Measures {
         public static Double offsetBoard = 17.5;
         public static Double offsetBoardExternal = 17.5;
+        public static Double smalloffsetBoard = 6;
     }
 
 

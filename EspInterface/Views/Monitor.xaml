@@ -153,7 +153,7 @@
                                             <TextBlock Text="{Binding date}" FontSize="12" Foreground="#9EA3AA" Width="52.5" TextAlignment="Right"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Height="16">
-                                            <TextBlock Text="" FontSize="12" Foreground="#9EA3AA" Width="52.5" TextAlignment="Left"/>
+                                            <TextBlock Text="{Binding yMeters, Converter={StaticResource yDevicePosition_StringFloatConverter}}" FontSize="12" Foreground="#9EA3AA" Width="52.5" TextAlignment="Left"/>
                                             <TextBlock Text="{Binding time}" FontSize="12" Foreground="#9EA3AA" Width="52.5" TextAlignment="Right"/>
                                         </StackPanel>
                                     </StackPanel>

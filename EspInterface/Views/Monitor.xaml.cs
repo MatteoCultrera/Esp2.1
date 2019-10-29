@@ -31,6 +31,7 @@ namespace EspInterface.Views
         private static double initialPosX = 80, initialPosY = 100.3;
         private static double offset = 26.45;
         private List<boardsInGrid> boards = new List<boardsInGrid>();
+        bool[,] mask= new bool[10, 10];
 
         public Monitor()
         {
@@ -72,10 +73,12 @@ namespace EspInterface.Views
 
             List<Board> modelBoards = mm.getBoards();
 
-            foreach(Board b in modelBoards)
+            boardsInGrid last = null;
+
+            for(int i = 0; i < modelBoards.Count; i++)
             {
                 boardsInGrid bing = new boardsInGrid();
-                bing.b = b;
+                bing.b = modelBoards[i];
                 bing.boardImage = new Image();
                 bing.boardImage.Source = new BitmapImage(new Uri("/Resources/Icons/boardDevice.png", UriKind.Relative));
                 bing.boardImage.Width = 12;
@@ -89,9 +92,97 @@ namespace EspInterface.Views
                 Canvas.SetLeft(bing.boardImage, 66.6 + offset * bing.b.posX);
                 Canvas.SetBottom(bing.boardImage, 86.6 + offset * bing.b.posY);
 
+                SolidColorBrush white = new SolidColorBrush();
+                white.Color = Colors.White;
+
+                bing.connectLine = new Line();
+
+                bing.connectLine.StrokeThickness = 3;
+                bing.connectLine.Stroke = white;
+                bing.connectLine.Visibility = Visibility.Collapsed;
+                
+
+                if (i + 1 < modelBoards.Count && modelBoards.Count != 1)
+                {
+                    bing.connectLine.X1 = 66.6 + offset * bing.b.posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y1 = 575 - (86.6 + offset * bing.b.posY + Measures.smalloffsetBoard);
+                    bing.connectLine.X2 = 66.6 + offset * modelBoards[i + 1].posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y2 = 575 - (86.6 + offset * modelBoards[i+1].posY + Measures.smalloffsetBoard);
+                    bing.connectLine.Visibility = Visibility.Visible;
+                }
+                else if(i+1 == modelBoards.Count && modelBoards.Count > 2)
+                {
+                    bing.connectLine.X1 = 66.6 + offset * bing.b.posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y1 = 575 - (86.6 + offset * bing.b.posY + Measures.smalloffsetBoard);
+                    bing.connectLine.X2 = 66.6 + offset * modelBoards[0].posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y2 = 575 - (86.6 + offset * modelBoards[0].posY + Measures.smalloffsetBoard);
+                    bing.connectLine.Visibility = Visibility.Visible;
+                }
                 boards.Add(bing);
+                canvas.Children.Add(bing.connectLine);
+                Panel.SetZIndex(bing.connectLine, 23);
             }
 
+            //generateMatrix();
+
+        }
+
+        public void generateMatrix()
+        {
+            string s = "";
+            MonitorModel mm = (MonitorModel)(this.DataContext);
+            List<Board> modelBoards = mm.getBoards();
+
+            Point[] pol = new Point[modelBoards.Count];
+
+            for(int i = 0; i < modelBoards.Count; i++)
+            {
+                pol[i] = new Point(modelBoards[i].posX, modelBoards[i].posY);
+            }
+
+
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 10; j++)
+                {
+                    Point test = new Point(i, j );
+                    mask[i, j] = PointInPolygon(pol, test);
+                }
+                    
+               
+
+            for (int i = 9; i >= 0; i--)
+            {
+                for (int j = 0; j < 10; j++)
+                {                 
+                    s += mask[j, i] ? "*" : " .";
+                }
+                s += "\n";
+            }
+
+            MessageBox.Show(s);
+        }
+        /// <summary>
+        /// Determines if the given point is inside the polygon
+        /// </summary>
+        /// <param name="polygon">the vertices of polygon</param>
+        /// <param name="testPoint">the given point</param>
+        /// <returns>true if the point is inside the polygon; otherwise, false</returns>
+        public static bool PointInPolygon(Point[] polygon, Point testPoint)
+        {
+            bool result = false;
+            int j = polygon.Count() - 1;
+            for (int i = 0; i < polygon.Count(); i++)
+            {
+                if (polygon[i].Y < testPoint.Y && polygon[j].Y >= testPoint.Y || polygon[j].Y < testPoint.Y && polygon[i].Y >= testPoint.Y)
+                {
+                    if (polygon[i].X + (testPoint.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) * (polygon[j].X - polygon[i].X) < testPoint.X)
+                    {
+                        result = !result;
+                    }
+                }
+                j = i;
+            }
+            return result;
         }
 
         public void setChecked(object o, RoutedEventArgs e)
@@ -365,6 +456,7 @@ namespace EspInterface.Views
     {
         public Board b;
         public Image boardImage;
+        public Line connectLine;
     }
 
     //Code for Value Converters

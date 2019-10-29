@@ -8,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Timers;
 using System.Text.RegularExpressions;
+using System.Windows;
+
 namespace EspInterface.ViewModels
 {
     public class MonitorModel : INotifyPropertyChanged
@@ -25,6 +27,7 @@ namespace EspInterface.ViewModels
         private int currentX, currentY;
         private Timer roomCheckTimer;
         private int counter = 60;
+        private bool[,] mask = new bool[10, 10];
 
         //Public attributes
         public ObservableCollection<Device> currentDevicesList
@@ -49,6 +52,8 @@ namespace EspInterface.ViewModels
                     _boards = value;
 
                     this.NotifyPropertyChanged("boards");
+
+                    generateMatrix();
                 }
                 
             }
@@ -106,9 +111,19 @@ namespace EspInterface.ViewModels
         {
             totalDevicesList.Clear();
             clearMatrix();
-            totalDevicesList = newDevices;
+           
 
-            createMatrix(newDevices);
+            Point[] pol = new Point[boards.Count];
+
+            for (int i = 0; i < boards.Count; i++)   
+                pol[i] = new Point(boards[i].posX, boards[i].posY);
+
+
+            foreach (Device d in newDevices)
+                if (PointInPolygon(pol, new Point(d.x, d.y)))
+                    totalDevicesList.Add(d);
+
+            createMatrix(totalDevicesList);
 
            
 
@@ -140,7 +155,43 @@ namespace EspInterface.ViewModels
 
         }
 
-        
+        public void generateMatrix()
+        {
+            string s = "";
+
+            Point[] pol = new Point[boards.Count];
+
+            for (int i = 0; i < boards.Count; i++)
+            {
+                pol[i] = new Point(boards[i].posX, boards[i].posY);
+            }
+
+
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 10; j++)
+                {
+                    Point test = new Point(i + 0.5, j + 0.5);
+                    mask[i, j] = PointInPolygon(pol, test);
+                }
+        }
+
+        public static bool PointInPolygon(Point[] polygon, Point testPoint)
+        {
+            bool result = false;
+            int j = polygon.Count() - 1;
+            for (int i = 0; i < polygon.Count(); i++)
+            {
+                if (polygon[i].Y < testPoint.Y && polygon[j].Y >= testPoint.Y || polygon[j].Y < testPoint.Y && polygon[i].Y >= testPoint.Y)
+                {
+                    if (polygon[i].X + (testPoint.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) * (polygon[j].X - polygon[i].X) < testPoint.X)
+                    {
+                        result = !result;
+                    }
+                }
+                j = i;
+            }
+            return result;
+        }
 
         public void NotifyPropertyChanged(string propName)
         {
