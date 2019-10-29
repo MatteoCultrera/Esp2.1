@@ -31,7 +31,6 @@ namespace EspInterface.Views
         private static double initialPosX = 80, initialPosY = 100.3;
         private static double offset = 26.45;
         private List<boardsInGrid> boards = new List<boardsInGrid>();
-        bool[,] mask= new bool[10, 10];
 
         public Monitor()
         {
@@ -55,7 +54,7 @@ namespace EspInterface.Views
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
 
-            mm.newDataAvailable += newData;
+            mm.newDataAvailable += newData_D;
 
             Style style = canvas.FindResource("deviceZoom") as Style;
 
@@ -123,68 +122,8 @@ namespace EspInterface.Views
                 Panel.SetZIndex(bing.connectLine, 23);
             }
 
-            //generateMatrix();
-
         }
-
-        public void generateMatrix()
-        {
-            string s = "";
-            MonitorModel mm = (MonitorModel)(this.DataContext);
-            List<Board> modelBoards = mm.getBoards();
-
-            Point[] pol = new Point[modelBoards.Count];
-
-            for(int i = 0; i < modelBoards.Count; i++)
-            {
-                pol[i] = new Point(modelBoards[i].posX, modelBoards[i].posY);
-            }
-
-
-            for (int i = 0; i < 10; i++)
-                for (int j = 0; j < 10; j++)
-                {
-                    Point test = new Point(i, j );
-                    mask[i, j] = PointInPolygon(pol, test);
-                }
-                    
-               
-
-            for (int i = 9; i >= 0; i--)
-            {
-                for (int j = 0; j < 10; j++)
-                {                 
-                    s += mask[j, i] ? "*" : " .";
-                }
-                s += "\n";
-            }
-
-            MessageBox.Show(s);
-        }
-        /// <summary>
-        /// Determines if the given point is inside the polygon
-        /// </summary>
-        /// <param name="polygon">the vertices of polygon</param>
-        /// <param name="testPoint">the given point</param>
-        /// <returns>true if the point is inside the polygon; otherwise, false</returns>
-        public static bool PointInPolygon(Point[] polygon, Point testPoint)
-        {
-            bool result = false;
-            int j = polygon.Count() - 1;
-            for (int i = 0; i < polygon.Count(); i++)
-            {
-                if (polygon[i].Y < testPoint.Y && polygon[j].Y >= testPoint.Y || polygon[j].Y < testPoint.Y && polygon[i].Y >= testPoint.Y)
-                {
-                    if (polygon[i].X + (testPoint.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) * (polygon[j].X - polygon[i].X) < testPoint.X)
-                    {
-                        result = !result;
-                    }
-                }
-                j = i;
-            }
-            return result;
-        }
-
+        
         public void setChecked(object o, RoutedEventArgs e)
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
@@ -213,12 +152,12 @@ namespace EspInterface.Views
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
 
-            mm.newDataAvailable -= newData;
+            mm.newDataAvailable -= newData_D;
         }
 
         
 
-            private void newData(object sender, EventArgs e)
+            private void newData_D(object sender, EventArgs e)
         {
             TimeSpan timing = new TimeSpan(0, 0, 0, 0, 400);
             TimeSpan secondAnim = new TimeSpan(0, 0, 4);
@@ -275,12 +214,11 @@ namespace EspInterface.Views
 
             firstFading.Begin();
 
-            updateBoarGrid();
+            updateBoardGrid_D();
             
-
         }
 
-        private void updateBoarGrid()
+        private void updateBoardGrid_D()
         {
 
             MonitorModel mm = (MonitorModel)(this.DataContext);
