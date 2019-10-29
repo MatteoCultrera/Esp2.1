@@ -33,8 +33,6 @@ namespace EspInterface
         List<Board> boards;
         private DebugPhase phase = DebugPhase.monitor;
 
-
-
         public enum DebugPhase
         {
             none, setup, monitor, statistics
@@ -74,9 +72,9 @@ namespace EspInterface
                     }
 
                     boards[0].posX = 0; boards[0].posY = 0;
-                    boards[1].posX = 10; boards[1].posY = 0;
-                    boards[2].posX = 0; boards[2].posY = 10;
-                    boards[3].posX = 5; boards[3].posY = 5;
+                    boards[1].posX = 0; boards[1].posY = 10;
+                    boards[2].posX = 10; boards[2].posY = 8;
+                    boards[3].posX = 9; boards[3].posY = 0;
                     ObservableCollection<Board> obsBoards = new ObservableCollection<Board>(boards);
                     monitor.boards = obsBoards;
                     monitor.maxRoomSize = 10;

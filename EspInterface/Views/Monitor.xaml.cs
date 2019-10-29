@@ -54,7 +54,7 @@ namespace EspInterface.Views
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
 
-            mm.newDataAvailable += newData;
+            mm.newDataAvailable += newData_D;
 
             Style style = canvas.FindResource("deviceZoom") as Style;
 
@@ -72,10 +72,12 @@ namespace EspInterface.Views
 
             List<Board> modelBoards = mm.getBoards();
 
-            foreach(Board b in modelBoards)
+            boardsInGrid last = null;
+
+            for(int i = 0; i < modelBoards.Count; i++)
             {
                 boardsInGrid bing = new boardsInGrid();
-                bing.b = b;
+                bing.b = modelBoards[i];
                 bing.boardImage = new Image();
                 bing.boardImage.Source = new BitmapImage(new Uri("/Resources/Icons/boardDevice.png", UriKind.Relative));
                 bing.boardImage.Width = 12;
@@ -89,11 +91,39 @@ namespace EspInterface.Views
                 Canvas.SetLeft(bing.boardImage, 66.6 + offset * bing.b.posX);
                 Canvas.SetBottom(bing.boardImage, 86.6 + offset * bing.b.posY);
 
+                SolidColorBrush white = new SolidColorBrush();
+                white.Color = Colors.White;
+
+                bing.connectLine = new Line();
+
+                bing.connectLine.StrokeThickness = 3;
+                bing.connectLine.Stroke = white;
+                bing.connectLine.Visibility = Visibility.Collapsed;
+                
+
+                if (i + 1 < modelBoards.Count && modelBoards.Count != 1)
+                {
+                    bing.connectLine.X1 = 66.6 + offset * bing.b.posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y1 = 575 - (86.6 + offset * bing.b.posY + Measures.smalloffsetBoard);
+                    bing.connectLine.X2 = 66.6 + offset * modelBoards[i + 1].posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y2 = 575 - (86.6 + offset * modelBoards[i+1].posY + Measures.smalloffsetBoard);
+                    bing.connectLine.Visibility = Visibility.Visible;
+                }
+                else if(i+1 == modelBoards.Count && modelBoards.Count > 2)
+                {
+                    bing.connectLine.X1 = 66.6 + offset * bing.b.posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y1 = 575 - (86.6 + offset * bing.b.posY + Measures.smalloffsetBoard);
+                    bing.connectLine.X2 = 66.6 + offset * modelBoards[0].posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y2 = 575 - (86.6 + offset * modelBoards[0].posY + Measures.smalloffsetBoard);
+                    bing.connectLine.Visibility = Visibility.Visible;
+                }
                 boards.Add(bing);
+                canvas.Children.Add(bing.connectLine);
+                Panel.SetZIndex(bing.connectLine, 23);
             }
 
         }
-
+        
         public void setChecked(object o, RoutedEventArgs e)
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
@@ -122,12 +152,12 @@ namespace EspInterface.Views
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
 
-            mm.newDataAvailable -= newData;
+            mm.newDataAvailable -= newData_D;
         }
 
         
 
-            private void newData(object sender, EventArgs e)
+            private void newData_D(object sender, EventArgs e)
         {
             TimeSpan timing = new TimeSpan(0, 0, 0, 0, 400);
             TimeSpan secondAnim = new TimeSpan(0, 0, 4);
@@ -184,12 +214,11 @@ namespace EspInterface.Views
 
             firstFading.Begin();
 
-            updateBoarGrid();
+            updateBoardGrid_D();
             
-
         }
 
-        private void updateBoarGrid()
+        private void updateBoardGrid_D()
         {
 
             MonitorModel mm = (MonitorModel)(this.DataContext);
@@ -365,6 +394,7 @@ namespace EspInterface.Views
     {
         public Board b;
         public Image boardImage;
+        public Line connectLine;
     }
 
     //Code for Value Converters
