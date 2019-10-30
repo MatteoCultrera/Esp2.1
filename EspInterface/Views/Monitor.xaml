@@ -169,11 +169,7 @@
 
                 <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
-                <Setter Property="Background">
-                    <Setter.Value>
-                        <ImageBrush Stretch="Fill" ImageSource="/Resources/Icons/backgroundDevicesList.png"/>
-                    </Setter.Value>
-                </Setter>
+                <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Template">
                     <Setter.Value>
@@ -326,9 +322,12 @@
         <TextBlock Canvas.Top="470" Text="0 m" Width="40" Height="14" TextAlignment="Right" FontSize="12" Grid.Row="1" Foreground="#9EA3AA"/>
 
         <Grid Canvas.Left="400" Canvas.Top="195">
-            <Border x:Name="Border1" CornerRadius="16" Background="#3C4149" BorderThickness="0" />
-            <ListBox Height="310" Width="180"  Name="DevicesLB">
-                
+            <Border x:Name="Border1" CornerRadius="16" BorderThickness="0" Height="310" VerticalAlignment="Top">
+                <Border.Background>
+                    <ImageBrush Stretch="Fill" ImageSource="/Resources/Icons/backgroundDevicesList.png"/>
+                </Border.Background>
+            </Border>
+            <ListBox Height="310" Width="180"  Name="DevicesLB" VerticalAlignment="Top">
             </ListBox>
             <Grid.OpacityMask>
                 <VisualBrush Visual="{Binding ElementName=Border1}" />

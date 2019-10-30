@@ -31,6 +31,7 @@ namespace EspInterface.Views
         private static double initialPosX = 80, initialPosY = 100.3;
         private static double offset = 26.45;
         private List<boardsInGrid> boards = new List<boardsInGrid>();
+        private List<devicesInGrid> deviceSearched = new List<devicesInGrid>();
 
         public Monitor()
         {
@@ -143,8 +144,8 @@ namespace EspInterface.Views
 
 
             curr.IsChecked = true;
-            DevicesLB.ItemsSource = mm.getGridDevices(x, y);
-            
+            //DevicesLB.ItemsSource = mm.getGridDevices(x, y); 
+            changeData_D(x, y, true);
 
         }
 
@@ -233,12 +234,14 @@ namespace EspInterface.Views
                         {
                             devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
                             devicesMatrix[i][j].deviceCheckbox.Content = devicesMatrix[i][j].numDevices + "";
-                            DevicesLB.ItemsSource = mm.getGridDevices(i, j);
+                            //DevicesLB.ItemsSource = mm.getGridDevices(i, j);
+                            changeData_D(i, j, true);
                         }
                         else
                         {
                             devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
-                            DevicesLB.ItemsSource = null;
+                            //DevicesLB.ItemsSource = null;
+                            changeData_D(0, 0, false);
                          }
                         break;
                     }
@@ -258,6 +261,92 @@ namespace EspInterface.Views
         {
             Canvas.SetLeft(device.deviceCheckbox, initialPosX + offset * device.x);
             Canvas.SetBottom(device.deviceCheckbox, initialPosY + offset * device.y);
+        }
+
+        private void changeData_D(int x, int y, bool hasData)
+        {
+            MonitorModel mm = (MonitorModel)this.DataContext;
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(fadeIn);
+
+            fadeChange.Completed += (s, a) => {
+                if (hasData == true)
+                    DevicesLB.ItemsSource = mm.getGridDevices(x, y);
+                else
+                    DevicesLB.ItemsSource = null;
+                changed.Begin();
+            };
+            fadeChange.Begin();
+        }
+
+        private void shrinkListBox(int x, int y) {
+
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation shrinkBorder = new DoubleAnimation()
+            {
+                To = 77.5,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(shrinkBorder, Border1);
+            Storyboard.SetTargetProperty(shrinkBorder, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation shrinkList = new DoubleAnimation()
+            {
+                To = 77.5,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(shrinkList, DevicesLB);
+            Storyboard.SetTargetProperty(shrinkList, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                BeginTime = TimeSpan.FromMilliseconds(400),
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(shrinkBorder);
+            changed.Children.Add(shrinkList);
+            changed.Children.Add(fadeIn);
+
+            fadeChange.Completed += (s, a) => {
+                //Here place the data inside
+                
+                changed.Begin();
+            };
+
+            fadeChange.Begin();
+
+        }
+
+        private void enlargeListBox() {
+
         }
 
         private void handleTextMAC(object sender, TextCompositionEventArgs e)
@@ -292,13 +381,16 @@ namespace EspInterface.Views
 
         private void mac_LostFocus(object sender, RoutedEventArgs e)
         {
+            MonitorModel mm = (MonitorModel)this.DataContext;
             TextBox box = sender as TextBox;
             Regex regex = new Regex("^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$");
 
          
 
             if (regex.IsMatch(box.Text)){
-                
+                //TODO: add code to search MAC
+
+
             }
             else
             {

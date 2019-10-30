@@ -230,6 +230,20 @@ namespace EspInterface.ViewModels
             }
         }
 
+        public Device findDevice(string MAC)
+        {
+            Device toRet = null;
+
+            foreach(Device d in totalDevicesList)
+            {
+                if (d.mac.Equals(MAC))
+                    toRet = d;
+            }
+
+            return toRet;
+
+        }
+
         //Constructor
         public MonitorModel()
         {
