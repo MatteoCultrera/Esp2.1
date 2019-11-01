@@ -117,19 +117,19 @@ namespace EspInterface
         //Debug code to force Monitor
         private void debugForceMonitor()
         {
-
-            for(int i = 0; i < 20; i++)
+            List<Device> oldDevices = new List<Device>();
+            Thread.Sleep(600);
+            for (int i = 0; i < 20; i++)
             {
                 //Can be called from a secondary thread
-                monitor.startedScanning();
-                //Simulate scanning room
-                Thread.Sleep(60000);
+               
+
                 List<Device> newDevices = new List<Device>();
                 Random random = new Random();
                 
                 for(int num = 0; num < 300; num++)
                 {
-                    Device d = new Device(GetRandomMacAddress(random), random.NextDouble() * 10, random.NextDouble() * 10, "00,00,00", "21/10/19", "16:"+(33+i), monitor.maxRoomSize);
+                    Device d = new Device(((i%2==0)?GetRandomMacAddress(random):oldDevices[num].mac), random.NextDouble() * 10, random.NextDouble() * 10, "00,00,00", "21/10/19", "16:"+(33+i), monitor.maxRoomSize);
                     //MessageBox.Show(d.mac + " " + d.x + " " + d.xInt + " " + d.y + " " + d.yInt);
                     newDevices.Add(d);
                 }
@@ -156,6 +156,13 @@ namespace EspInterface
                 {
                     return;
                 }
+
+                oldDevices = newDevices;
+                //Simulate scanning room
+                monitor.startedScanning();
+                Thread.Sleep(60000);
+
+
 
             }
         }

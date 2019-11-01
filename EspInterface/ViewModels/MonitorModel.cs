@@ -28,6 +28,7 @@ namespace EspInterface.ViewModels
         private Timer roomCheckTimer;
         private int counter = 60;
         private bool[,] mask = new bool[10, 10];
+        private bool hasData = false;
 
         //Public attributes
         public ObservableCollection<Device> currentDevicesList
@@ -125,8 +126,8 @@ namespace EspInterface.ViewModels
 
             createMatrix(totalDevicesList);
 
-           
 
+            hasData = true;
             newDataAvailable?.Invoke(this, null);
 
             if (currentX == -1 || currentY == -1)
@@ -138,6 +139,11 @@ namespace EspInterface.ViewModels
         {
             ObservableCollection<Device> toReturn = new ObservableCollection<Device>(devicesInGrid[x][y]);
             return toReturn;
+        }
+
+        public List<Device> getAllDevices()
+        {
+            return totalDevicesList;
         }
 
         private void clearMatrix()

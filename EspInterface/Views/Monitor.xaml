@@ -321,12 +321,12 @@
         <TextBlock Canvas.Top="203" Text="{Binding maxRoomSize, Converter={StaticResource roomSize_StringFloatConverter}}" Width="40" Height="14" TextAlignment="Right" FontSize="12" Grid.Row="1" Foreground="#9EA3AA"/>
         <TextBlock Canvas.Top="470" Text="0 m" Width="40" Height="14" TextAlignment="Right" FontSize="12" Grid.Row="1" Foreground="#9EA3AA"/>
 
-        <Grid Canvas.Left="400" Canvas.Top="195">
-            <Border x:Name="Border1" CornerRadius="16" BorderThickness="0" Height="310" VerticalAlignment="Top">
-                <Border.Background>
-                    <ImageBrush Stretch="Fill" ImageSource="/Resources/Icons/backgroundDevicesList.png"/>
-                </Border.Background>
-            </Border>
+        <Border x:Name="Border2" Canvas.Left="400" Canvas.Top="195" CornerRadius="16" BorderThickness="0" Height="77.5" Width="180" VerticalAlignment="Top" Background="#222528"/>
+        <Border x:Name="Border1" Canvas.Left="400" Canvas.Top="195" CornerRadius="16" BorderThickness="0" Height="310" Width="180" VerticalAlignment="Top" Background="#222528"/>
+
+        
+
+        <Grid Canvas.Left="400" Canvas.Top="195" Name="gridListBox">
             <ListBox Height="310" Width="180"  Name="DevicesLB" VerticalAlignment="Top">
             </ListBox>
             <Grid.OpacityMask>
@@ -334,9 +334,7 @@
             </Grid.OpacityMask>
         </Grid>
 
-       
-        <Image Source="/Resources/Icons/searchMacBackground.png" Width="180" Height="30"
-               Canvas.Left="400" Canvas.Top="155"/>
+        <Border Background="#222528" BorderThickness="0" CornerRadius="16" Width="180" Height="30" Canvas.Left="400"  Canvas.Top="155"/>
 
         <StackPanel Orientation="Horizontal" Canvas.Left="400" Canvas.Top="155" Width="180" Height="30">
             <Image Source="/Resources/Icons/searchIcon.png" Width="13" Margin="14, 0, 7, 0"/>
