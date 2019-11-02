@@ -282,5 +282,11 @@
   <ItemGroup>
     <Resource Include="Resources\Icons\boardDevice.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\SearchIconActive.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\cancelMonitor.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

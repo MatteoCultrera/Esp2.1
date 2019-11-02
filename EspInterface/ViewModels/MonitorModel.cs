@@ -28,9 +28,11 @@ namespace EspInterface.ViewModels
         private Timer roomCheckTimer;
         private int counter = 60;
         private bool[,] mask = new bool[10, 10];
-        private bool hasData = false;
+
 
         //Public attributes
+        public bool hasData = false;
+
         public ObservableCollection<Device> currentDevicesList
         {
             get { return _currentDevicesList; }
