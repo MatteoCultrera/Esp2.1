@@ -33,6 +33,9 @@ namespace EspInterface.Views
         private List<boardsInGrid> boards = new List<boardsInGrid>();
         private List<Device> deviceSearched = new List<Device>();
         private bool searching = false;
+        private BitmapImage searchGrey = new BitmapImage(new Uri("/Resources/Icons/searchIcon.png", UriKind.Relative));
+        private BitmapImage searchWhite = new BitmapImage(new Uri("/Resources/Icons/searchIconActive.png", UriKind.Relative));
+        private BitmapImage cancelMonitor = new BitmapImage(new Uri("/Resources/Icons/cancelMonitor.png", UriKind.Relative));
 
         public Monitor()
         {
@@ -70,6 +73,7 @@ namespace EspInterface.Views
                     devicesMatrix[i][j].deviceCheckbox.Style = style;
                     setPositionsInGrid(devicesMatrix[i][j]);
                     devicesMatrix[i][j].deviceCheckbox.Click += setChecked;
+                    devicesMatrix[i][j].deviceCheckbox.IsChecked = false;
                     devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
                 }
 
@@ -125,13 +129,31 @@ namespace EspInterface.Views
                 Panel.SetZIndex(bing.connectLine, 23);
             }
 
+            if (mm.hasData)
+            {
+                updateBoardGrid_D();
+            }
+
         }
         
+        public void searchButton_mouseUp(object e, RoutedEventArgs args) {
+            if(deviceSearched.Count == 0)
+            {
+                ClearFocus.Focus();
+            }
+            else
+            {
+                enlargeListBoxClean(deviceSearched[0].xInt, deviceSearched[0].yInt);
+                deviceSearched.Clear();
+                MacTextBox.Text = "Search MAC";
+            }
+        }
+
         public void setChecked(object o, RoutedEventArgs e)
         {
             if (searching)
                 return;
-
+            
             MonitorModel mm = (MonitorModel)(this.DataContext);
             CheckBox curr = (CheckBox)o;
             int x= -1, y = -1;
@@ -517,6 +539,67 @@ namespace EspInterface.Views
             fadeChange.Begin();
         }
 
+        private void enlargeListBoxClean(int x, int y)
+        {
+            MonitorModel mm = (MonitorModel)this.DataContext;
+
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation enlargeBorder = new DoubleAnimation()
+            {
+                To = 310,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(enlargeBorder, Border1);
+            Storyboard.SetTargetProperty(enlargeBorder, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation enlargeList = new DoubleAnimation()
+            {
+                To = 310,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(enlargeList, DevicesLB);
+            Storyboard.SetTargetProperty(enlargeList, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                BeginTime = TimeSpan.FromMilliseconds(400),
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            Storyboard secondChanged = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(enlargeBorder);
+            changed.Children.Add(enlargeList);
+            secondChanged.Children.Add(fadeIn);
+
+            fadeChange.Completed += (s, a) => {
+                //Here place the data inside
+                DevicesLB.ItemsSource = mm.getGridDevices(x, y);
+                changed.Begin();
+            };
+
+            changed.Completed += (s, a) =>
+            {
+                gridListBox.OpacityMask = new VisualBrush()
+                {
+                    Visual = Border1
+                };
+                secondChanged.Begin();
+            };
+
+
+            fadeChange.Begin();
+        }
+
         private void handleTextMAC(object sender, TextCompositionEventArgs e)
         {
             TextBox box = sender as TextBox;
@@ -533,6 +616,24 @@ namespace EspInterface.Views
             
 
             e.Handled = !regex.IsMatch(e.Text);
+        }
+
+        private void changeButtonAfterText(object sender, TextChangedEventArgs e)
+        {
+            TextBox b = sender as TextBox;
+
+            if (deviceSearched.Count == 0)
+            {
+                if (b.GetLineLength(0) > 0 &&
+                    !b.GetLineText(0).Equals("Search MAC") &&
+                    !b.GetLineText(0).Equals("Wrong MAC") &&
+                    !b.GetLineText(0).Equals("MAC Lost") &&
+                    !b.GetLineText(0).Equals("MAC not Found"))
+                    tbButton.Content = searchWhite;
+                else
+                    tbButton.Content = searchGrey;
+            }
+            
         }
 
         private void handleKeyMAC(object sender, KeyEventArgs e)
@@ -558,7 +659,6 @@ namespace EspInterface.Views
          
 
             if (regex.IsMatch(box.Text)){
-                //TODO: add code to search MAC
                 searched = mm.findDevice(box.Text);
                 if (searched == null)
                 {
@@ -569,6 +669,7 @@ namespace EspInterface.Views
                 {
                     deviceSearched.Add(searched);
                     shrinkListBox();
+                    tbButton.Content = cancelMonitor;
                 }
                     
 
@@ -584,6 +685,12 @@ namespace EspInterface.Views
         private void mac_GotFocus(object sender, RoutedEventArgs e)
         {
             ((TextBox)sender).Text = "";
+            if (deviceSearched.Count != 0)
+            {
+                enlargeListBoxClean(deviceSearched[0].xInt, deviceSearched[0].yInt);
+                deviceSearched.Clear();
+            }
+            
         }
 
         private void clearMacSearch()
