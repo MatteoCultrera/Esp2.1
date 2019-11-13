@@ -26,7 +26,45 @@ namespace EspInterface.Models
         private string _time;
         private double scaleFactor;
 
+        //Public Fields
+        public string mac
+        {
+            get { return this._mac; }
+            set
+            {
+                if (this._mac != value)
+                {
+                    this._mac = value;
+                    NotifyPropertyChanged("mac");
+                }
+            }
+        }
 
+        public double x
+        {
+            get { return this._x; }
+            set
+            {
+                if (this._x != value)
+                {
+                    this._x = value;
+                    NotifyPropertyChanged("x");
+                }
+            }
+        }
+
+        public double y
+        {
+            get { return this._y; }
+            set
+            {
+                if (this._y != value)
+                {
+                    this._y = value;
+                    NotifyPropertyChanged("x");
+                }
+            }
+        }
         
         public double xMeters
         {

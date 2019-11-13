@@ -66,7 +66,7 @@ namespace EspInterface
                     listItems.Add(new menuItem() { enabled = true, text = "Statistics" });
                     listItems.Add(new menuItem() { enabled = true, text = "Quit App" });
                     boards = new List<Board>();
-                    for (int i = 0; i < 4; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         boards.Add(new Board("/Resources/Icons/Boards/Board" + i + "N.png", "Board " + i.ToString(), false, i));
                         boards[i].HasMac = true;
@@ -74,9 +74,10 @@ namespace EspInterface
                     }
 
                     boards[0].posX = 0; boards[0].posY = 0;
-                    boards[1].posX = 10; boards[1].posY = 0;
-                    boards[2].posX = 0; boards[2].posY = 10;
+                    boards[1].posX = 0; boards[1].posY = 10;
+                    boards[2].posX = 10; boards[2].posY = 8;
                     boards[3].posX = 5; boards[3].posY = 5;
+                    boards[4].posX = 9; boards[4].posY = 0;
                     ObservableCollection<Board> obsBoards = new ObservableCollection<Board>(boards);
                     monitor.boards = obsBoards;
                     monitor.maxRoomSize = 10;
@@ -117,19 +118,19 @@ namespace EspInterface
         //Debug code to force Monitor
         private void debugForceMonitor()
         {
-
-            for(int i = 0; i < 20; i++)
+            List<Device> oldDevices = new List<Device>();
+            Thread.Sleep(600);
+            for (int i = 0; i < 20; i++)
             {
                 //Can be called from a secondary thread
-                monitor.startedScanning();
-                //Simulate scanning room
-                Thread.Sleep(60000);
+               
+
                 List<Device> newDevices = new List<Device>();
                 Random random = new Random();
                 
                 for(int num = 0; num < 300; num++)
                 {
-                    Device d = new Device(GetRandomMacAddress(random), random.NextDouble() * 10, random.NextDouble() * 10, "00,00,00", "21/10/19", "16:"+(33+i), monitor.maxRoomSize);
+                    Device d = new Device(((i%2==0)?GetRandomMacAddress(random):oldDevices[num].mac), random.NextDouble() * 10, random.NextDouble() * 10, "00,00,00", "21/10/19", "16:"+(33+i), monitor.maxRoomSize);
                     //MessageBox.Show(d.mac + " " + d.x + " " + d.xInt + " " + d.y + " " + d.yInt);
                     newDevices.Add(d);
                 }
@@ -138,7 +139,6 @@ namespace EspInterface
                 newDevices.Add(new Device("First"+i, 0.2, 0.4, "00,00,00", "date", "time", monitor.maxRoomSize));
 
                 newDevices.Add(new Device("Second"+i, 3.2, 3.4, "00,00,00", "date", "time", monitor.maxRoomSize));
-
                 newDevices.Add(new Device("Third"+i, 0.2, 4.1, "00,00,00", "date", "time", monitor.maxRoomSize));
                 //Simulate Trilateration Calculation
                 Thread.Sleep(100);*/
@@ -157,6 +157,10 @@ namespace EspInterface
                     return;
                 }
 
+                oldDevices = newDevices;
+                //Simulate scanning room
+                monitor.startedScanning();
+                Thread.Sleep(60000);
             }
         }
 

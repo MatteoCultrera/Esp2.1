@@ -8,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Timers;
 using System.Text.RegularExpressions;
+using System.Windows;
+
 namespace EspInterface.ViewModels
 {
     public class MonitorModel : INotifyPropertyChanged
@@ -24,9 +26,13 @@ namespace EspInterface.ViewModels
         private List<Device> totalDevicesList;
         private int currentX, currentY;
         private Timer roomCheckTimer;
-        private int counter = 60;
+        private int counter = 60
+        private bool[,] mask = new bool[10, 10];
+
 
         //Public attributes
+        public bool hasData = false;
+
         public ObservableCollection<Device> currentDevicesList
         {
             get { return _currentDevicesList; }
@@ -49,6 +55,7 @@ namespace EspInterface.ViewModels
                     _boards = value;
 
                     this.NotifyPropertyChanged("boards");
+                    generateMatrix();
                 }
                 
             }
@@ -106,12 +113,22 @@ namespace EspInterface.ViewModels
         {
             totalDevicesList.Clear();
             clearMatrix();
-            totalDevicesList = newDevices;
-
-            createMatrix(newDevices);
-
            
 
+            Point[] pol = new Point[boards.Count];
+
+            for (int i = 0; i < boards.Count; i++)   
+                pol[i] = new Point(boards[i].posX, boards[i].posY);
+
+
+            foreach (Device d in newDevices)
+                if (PointInPolygon(pol, new Point(d.x, d.y)))
+                    totalDevicesList.Add(d);
+
+            createMatrix(totalDevicesList);
+
+
+            hasData = true;
             newDataAvailable?.Invoke(this, null);
 
             if (currentX == -1 || currentY == -1)
@@ -123,6 +140,11 @@ namespace EspInterface.ViewModels
         {
             ObservableCollection<Device> toReturn = new ObservableCollection<Device>(devicesInGrid[x][y]);
             return toReturn;
+        }
+
+        public List<Device> getAllDevices()
+        {
+            return totalDevicesList;
         }
 
         private void clearMatrix()
@@ -138,6 +160,45 @@ namespace EspInterface.ViewModels
                 devicesInGrid[d.xInt][d.yInt].Add(d);
             }
 
+        }
+
+        public void generateMatrix()
+        {
+            string s = "";
+
+            Point[] pol = new Point[boards.Count];
+
+            for (int i = 0; i < boards.Count; i++)
+            {
+                pol[i] = new Point(boards[i].posX, boards[i].posY);
+
+            }
+
+
+            for (int i = 0; i < 10; i++)
+                for (int j = 0; j < 10; j++)
+                {
+                    Point test = new Point(i + 0.5, j + 0.5);
+                    mask[i, j] = PointInPolygon(pol, test);
+                }
+        }
+
+        public static bool PointInPolygon(Point[] polygon, Point testPoint)
+        {
+            bool result = false;
+            int j = polygon.Count() - 1;
+            for (int i = 0; i < polygon.Count(); i++)
+            {
+                if (polygon[i].Y < testPoint.Y && polygon[j].Y >= testPoint.Y || polygon[j].Y < testPoint.Y && polygon[i].Y >= testPoint.Y)
+                {
+                    if (polygon[i].X + (testPoint.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) * (polygon[j].X - polygon[i].X) < testPoint.X)
+                    {
+                        result = !result;
+                    }
+                }
+                j = i;
+            }
+            return result;
         }
 
         
@@ -177,6 +238,21 @@ namespace EspInterface.ViewModels
             {
                 return devicesInGrid[x][y].Count;
             }
+        }
+
+
+        public Device findDevice(string MAC)
+        {
+            Device toRet = null;
+
+            foreach(Device d in totalDevicesList)
+            {
+                if (d.mac.Equals(MAC))
+                    toRet = d;
+            }
+
+            return toRet;
+
         }
 
         //Constructor

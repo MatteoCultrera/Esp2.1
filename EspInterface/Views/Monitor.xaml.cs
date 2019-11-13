@@ -31,6 +31,11 @@ namespace EspInterface.Views
         private static double initialPosX = 80, initialPosY = 100.3;
         private static double offset = 26.45;
         private List<boardsInGrid> boards = new List<boardsInGrid>();
+        private List<Device> deviceSearched = new List<Device>();
+        private bool searching = false;
+        private BitmapImage searchGrey = new BitmapImage(new Uri("/Resources/Icons/searchIcon.png", UriKind.Relative));
+        private BitmapImage searchWhite = new BitmapImage(new Uri("/Resources/Icons/searchIconActive.png", UriKind.Relative));
+        private BitmapImage cancelMonitor = new BitmapImage(new Uri("/Resources/Icons/cancelMonitor.png", UriKind.Relative));
 
         public Monitor()
         {
@@ -54,8 +59,7 @@ namespace EspInterface.Views
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
 
-            mm.newDataAvailable += newData;
-
+            mm.newDataAvailable += newData_D;
             Style style = canvas.FindResource("deviceZoom") as Style;
 
             for (int i = 0; i < 10; i++)
@@ -67,15 +71,18 @@ namespace EspInterface.Views
                     devicesMatrix[i][j].deviceCheckbox.Style = style;
                     setPositionsInGrid(devicesMatrix[i][j]);
                     devicesMatrix[i][j].deviceCheckbox.Click += setChecked;
+                    devicesMatrix[i][j].deviceCheckbox.IsChecked = false;
                     devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
                 }
 
             List<Board> modelBoards = mm.getBoards();
 
-            foreach(Board b in modelBoards)
+            boardsInGrid last = null;
+
+            for(int i = 0; i < modelBoards.Count; i++)
             {
                 boardsInGrid bing = new boardsInGrid();
-                bing.b = b;
+                bing.b = modelBoards[i];
                 bing.boardImage = new Image();
                 bing.boardImage.Source = new BitmapImage(new Uri("/Resources/Icons/boardDevice.png", UriKind.Relative));
                 bing.boardImage.Width = 12;
@@ -89,13 +96,62 @@ namespace EspInterface.Views
                 Canvas.SetLeft(bing.boardImage, 66.6 + offset * bing.b.posX);
                 Canvas.SetBottom(bing.boardImage, 86.6 + offset * bing.b.posY);
 
+                SolidColorBrush white = new SolidColorBrush();
+                white.Color = Colors.White;
+
+                bing.connectLine = new Line();
+
+                bing.connectLine.StrokeThickness = 3;
+                bing.connectLine.Stroke = white;
+                bing.connectLine.Visibility = Visibility.Collapsed;
+                
+
+                if (i + 1 < modelBoards.Count && modelBoards.Count != 1)
+                {
+                    bing.connectLine.X1 = 66.6 + offset * bing.b.posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y1 = 575 - (86.6 + offset * bing.b.posY + Measures.smalloffsetBoard);
+                    bing.connectLine.X2 = 66.6 + offset * modelBoards[i + 1].posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y2 = 575 - (86.6 + offset * modelBoards[i+1].posY + Measures.smalloffsetBoard);
+                    bing.connectLine.Visibility = Visibility.Visible;
+                }
+                else if(i+1 == modelBoards.Count && modelBoards.Count > 2)
+                {
+                    bing.connectLine.X1 = 66.6 + offset * bing.b.posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y1 = 575 - (86.6 + offset * bing.b.posY + Measures.smalloffsetBoard);
+                    bing.connectLine.X2 = 66.6 + offset * modelBoards[0].posX + Measures.smalloffsetBoard;
+                    bing.connectLine.Y2 = 575 - (86.6 + offset * modelBoards[0].posY + Measures.smalloffsetBoard);
+                    bing.connectLine.Visibility = Visibility.Visible;
+                }
                 boards.Add(bing);
+                canvas.Children.Add(bing.connectLine);
+                Panel.SetZIndex(bing.connectLine, 23);
             }
 
+            if (mm.hasData)
+            {
+                updateBoardGrid_D();
+            }
+
+        }
+        
+        public void searchButton_mouseUp(object e, RoutedEventArgs args) {
+            if(deviceSearched.Count == 0)
+            {
+                ClearFocus.Focus();
+            }
+            else
+            {
+                enlargeListBoxClean(deviceSearched[0].xInt, deviceSearched[0].yInt);
+                deviceSearched.Clear();
+                MacTextBox.Text = "Search MAC";
+            }
         }
 
         public void setChecked(object o, RoutedEventArgs e)
         {
+            if (searching)
+                return;
+            
             MonitorModel mm = (MonitorModel)(this.DataContext);
             CheckBox curr = (CheckBox)o;
             int x= -1, y = -1;
@@ -113,8 +169,15 @@ namespace EspInterface.Views
 
 
             curr.IsChecked = true;
-            DevicesLB.ItemsSource = mm.getGridDevices(x, y);
-            
+            //DevicesLB.ItemsSource = mm.getGridDevices(x, y); 
+
+            if(deviceSearched.Count != 0)
+            {
+                deviceSearched.Clear();
+                enlargeListBox(x, y, false);
+            }
+            else
+                changeData_D(x, y, true);
 
         }
 
@@ -122,12 +185,10 @@ namespace EspInterface.Views
         {
             MonitorModel mm = (MonitorModel)(this.DataContext);
 
-            mm.newDataAvailable -= newData;
+            mm.newDataAvailable -= newData_D;
         }
 
-        
-
-            private void newData(object sender, EventArgs e)
+        private void newData_D(object sender, EventArgs e)
         {
             TimeSpan timing = new TimeSpan(0, 0, 0, 0, 400);
             TimeSpan secondAnim = new TimeSpan(0, 0, 4);
@@ -184,12 +245,12 @@ namespace EspInterface.Views
 
             firstFading.Begin();
 
-            updateBoarGrid();
-            
 
+            updateBoardGrid_D();
+            
         }
 
-        private void updateBoarGrid()
+        private void updateBoardGrid_D()
         {
 
             MonitorModel mm = (MonitorModel)(this.DataContext);
@@ -200,20 +261,57 @@ namespace EspInterface.Views
                     devicesMatrix[i][j].numDevices = mm.numDevices(i, j);
                     if(devicesMatrix[i][j].deviceCheckbox.IsChecked == true)
                     {
-                        if (devicesMatrix[i][j].numDevices != -1)
+
+                        //NO devices searching currently
+                        if (deviceSearched.Count == 0)
                         {
-                            devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
-                            devicesMatrix[i][j].deviceCheckbox.Content = devicesMatrix[i][j].numDevices + "";
-                            DevicesLB.ItemsSource = mm.getGridDevices(i, j);
+                            if (devicesMatrix[i][j].numDevices != -1)
+                            {
+                                devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
+                                devicesMatrix[i][j].deviceCheckbox.Content = devicesMatrix[i][j].numDevices + "";
+                                //DevicesLB.ItemsSource = mm.getGridDevices(i, j);
+                                changeData_D(i, j, true);
+                            }
+                            else
+                            {
+                                devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
+                                devicesMatrix[i][j].deviceCheckbox.IsChecked = false;
+                                //DevicesLB.ItemsSource = null;
+                                changeData_D(0, 0, false);
+                            }
                         }
                         else
                         {
-                            devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
-                            DevicesLB.ItemsSource = null;
-                         }
-                        break;
+                            Device searchingDev = searchingDevicePresent(i, j, deviceSearched[0]);
+                            deviceSearched.Clear();
+                            if(searchingDev != null)
+                            {
+                                devicesMatrix[i][j].deviceCheckbox.IsChecked = false;
+                                deviceSearched.Add(searchingDev);
+                                changeData_Searching(i, j);
+                            }
+                            else
+                            {
+                                if (devicesMatrix[i][j].numDevices != -1)
+                                {
+                                    devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
+                                    devicesMatrix[i][j].deviceCheckbox.Content = devicesMatrix[i][j].numDevices + "";
+                                    //DevicesLB.ItemsSource = mm.getGridDevices(i, j);
+                                    enlargeListBox(i, j, true);
+                                }
+                                else
+                                {
+                                    devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Collapsed;
+                                    devicesMatrix[i][j].deviceCheckbox.IsChecked = false;
+                                    //DevicesLB.ItemsSource = null;
+                                    enlargeListBox(i, j, true);
+                                }
+                            }
+
+                        }
+                        
                     }
-                    if (devicesMatrix[i][j].numDevices != -1)
+                    else if (devicesMatrix[i][j].numDevices != -1)
                     {
                         devicesMatrix[i][j].deviceCheckbox.Visibility = Visibility.Visible;
                         devicesMatrix[i][j].deviceCheckbox.Content = devicesMatrix[i][j].numDevices + "";
@@ -225,10 +323,281 @@ namespace EspInterface.Views
 
         }
 
+        private Device searchingDevicePresent(int x, int y, Device d)
+        {
+            MonitorModel mm = (MonitorModel)this.DataContext;
+
+            foreach(Device dev in mm.getAllDevices())
+            {
+                if (dev.mac.Equals(d.mac))
+                    return dev;
+            }
+
+            return null;
+        }
+
         private void setPositionsInGrid(devicesInGrid device)
         {
             Canvas.SetLeft(device.deviceCheckbox, initialPosX + offset * device.x);
             Canvas.SetBottom(device.deviceCheckbox, initialPosY + offset * device.y);
+        }
+
+        private void changeData_D(int x, int y, bool hasData)
+        {
+            MonitorModel mm = (MonitorModel)this.DataContext;
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(fadeIn);
+
+            fadeChange.Completed += (s, a) => {
+                if (hasData == true)
+                    DevicesLB.ItemsSource = mm.getGridDevices(x, y);
+                else
+                    DevicesLB.ItemsSource = null;
+                changed.Begin();
+            };
+            fadeChange.Begin();
+        }
+
+        private void changeData_Searching(int x, int y)
+        {
+            MonitorModel mm = (MonitorModel)this.DataContext;
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(fadeIn);
+
+            fadeChange.Completed += (s, a) => {
+                DevicesLB.ItemsSource = deviceSearched;
+                devicesMatrix[deviceSearched[0].xInt][deviceSearched[0].yInt].deviceCheckbox.IsChecked = true;
+                changed.Begin();
+            };
+            fadeChange.Begin();
+        }
+
+        private void shrinkListBox() {
+
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation shrinkBorder = new DoubleAnimation()
+            {
+                To = 77.5,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(shrinkBorder, Border1);
+            Storyboard.SetTargetProperty(shrinkBorder, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation shrinkList = new DoubleAnimation()
+            {
+                To = 77.5,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(shrinkList, DevicesLB);
+            Storyboard.SetTargetProperty(shrinkList, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                BeginTime = TimeSpan.FromMilliseconds(400),
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            Storyboard secondChanged = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(shrinkBorder);
+            changed.Children.Add(shrinkList);
+            secondChanged.Children.Add(fadeIn);
+            
+            fadeChange.Completed += (s, a) => {
+                //Here place the data inside
+                DevicesLB.ItemsSource = deviceSearched;
+                for (int i = 0; i < 10; i++)
+                    for (int j = 0; j < 10; j++)
+                        devicesMatrix[i][j].deviceCheckbox.IsChecked = false;
+
+                devicesMatrix[deviceSearched[0].xInt][deviceSearched[0].yInt].deviceCheckbox.IsChecked = true;
+                changed.Begin();
+            };
+
+            changed.Completed += (s, a) =>
+            {
+                VisualBrush vb = new VisualBrush() {
+                    Visual = Border2
+                };
+                gridListBox.OpacityMask = vb;
+
+                secondChanged.Begin();
+            };
+
+            secondChanged.Completed += (s, a) =>
+            {
+                searching = false;
+            };
+
+            fadeChange.Begin();
+
+        }
+
+        private void enlargeListBox(int x, int y, bool macNotFound) {
+            MonitorModel mm = (MonitorModel)this.DataContext;
+
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation enlargeBorder = new DoubleAnimation()
+            {
+                To = 310,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(enlargeBorder, Border1);
+            Storyboard.SetTargetProperty(enlargeBorder, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation enlargeList = new DoubleAnimation()
+            {
+                To = 310,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(enlargeList, DevicesLB);
+            Storyboard.SetTargetProperty(enlargeList, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                BeginTime = TimeSpan.FromMilliseconds(400),
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            Storyboard secondChanged = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(enlargeBorder);
+            changed.Children.Add(enlargeList);
+            secondChanged.Children.Add(fadeIn);
+
+            fadeChange.Completed += (s, a) => {
+                //Here place the data inside
+                if (!macNotFound)
+                    clearMacSearch();
+                else
+                    showErrorMessage("MAC Lost");
+                DevicesLB.ItemsSource = mm.getGridDevices(x, y);
+                changed.Begin();
+            };
+
+            changed.Completed += (s, a) =>
+            {
+                gridListBox.OpacityMask = new VisualBrush() {
+                    Visual = Border1
+                };
+                secondChanged.Begin();
+            };
+            
+
+            fadeChange.Begin();
+        }
+
+        private void enlargeListBoxClean(int x, int y)
+        {
+            MonitorModel mm = (MonitorModel)this.DataContext;
+
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeOut, DevicesLB);
+            Storyboard.SetTargetProperty(fadeOut, new PropertyPath(Control.OpacityProperty));
+            DoubleAnimation enlargeBorder = new DoubleAnimation()
+            {
+                To = 310,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(enlargeBorder, Border1);
+            Storyboard.SetTargetProperty(enlargeBorder, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation enlargeList = new DoubleAnimation()
+            {
+                To = 310,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(enlargeList, DevicesLB);
+            Storyboard.SetTargetProperty(enlargeList, new PropertyPath(Control.HeightProperty));
+            DoubleAnimation fadeIn = new DoubleAnimation()
+            {
+                BeginTime = TimeSpan.FromMilliseconds(400),
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(400)
+            };
+            Storyboard.SetTarget(fadeIn, DevicesLB);
+            Storyboard.SetTargetProperty(fadeIn, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard fadeChange = new Storyboard();
+            Storyboard changed = new Storyboard();
+            Storyboard secondChanged = new Storyboard();
+            fadeChange.Children.Add(fadeOut);
+            changed.Children.Add(enlargeBorder);
+            changed.Children.Add(enlargeList);
+            secondChanged.Children.Add(fadeIn);
+
+            fadeChange.Completed += (s, a) => {
+                //Here place the data inside
+                DevicesLB.ItemsSource = mm.getGridDevices(x, y);
+                changed.Begin();
+            };
+
+            changed.Completed += (s, a) =>
+            {
+                gridListBox.OpacityMask = new VisualBrush()
+                {
+                    Visual = Border1
+                };
+                secondChanged.Begin();
+            };
+
+
+            fadeChange.Begin();
         }
 
         private void handleTextMAC(object sender, TextCompositionEventArgs e)
@@ -249,6 +618,24 @@ namespace EspInterface.Views
             e.Handled = !regex.IsMatch(e.Text);
         }
 
+        private void changeButtonAfterText(object sender, TextChangedEventArgs e)
+        {
+            TextBox b = sender as TextBox;
+
+            if (deviceSearched.Count == 0)
+            {
+                if (b.GetLineLength(0) > 0 &&
+                    !b.GetLineText(0).Equals("Search MAC") &&
+                    !b.GetLineText(0).Equals("Wrong MAC") &&
+                    !b.GetLineText(0).Equals("MAC Lost") &&
+                    !b.GetLineText(0).Equals("MAC not Found"))
+                    tbButton.Content = searchWhite;
+                else
+                    tbButton.Content = searchGrey;
+            }
+            
+        }
+
         private void handleKeyMAC(object sender, KeyEventArgs e)
         {
             TextBox box = sender as TextBox;
@@ -263,18 +650,34 @@ namespace EspInterface.Views
 
         private void mac_LostFocus(object sender, RoutedEventArgs e)
         {
+
+            MonitorModel mm = (MonitorModel)this.DataContext;
             TextBox box = sender as TextBox;
             Regex regex = new Regex("^[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}$");
-
+            Device searched;
+            searching = true;
          
 
             if (regex.IsMatch(box.Text)){
-                
+                searched = mm.findDevice(box.Text);
+                if (searched == null)
+                {
+                    showErrorMessage("MAC not Found");
+                    searching = false;
+                }
+                else
+                {
+                    deviceSearched.Add(searched);
+                    shrinkListBox();
+                    tbButton.Content = cancelMonitor;
+                }
+                    
+
             }
             else
-            {
-                
+            {      
                 showErrorMessage("Wrong MAC");
+                searching = false;
             }
 
         }
@@ -282,6 +685,53 @@ namespace EspInterface.Views
         private void mac_GotFocus(object sender, RoutedEventArgs e)
         {
             ((TextBox)sender).Text = "";
+            if (deviceSearched.Count != 0)
+            {
+                enlargeListBoxClean(deviceSearched[0].xInt, deviceSearched[0].yInt);
+                deviceSearched.Clear();
+            }
+            
+        }
+
+        private void clearMacSearch()
+        {
+            MacTextBox.Focusable = false;
+            TimeSpan timing = new TimeSpan(0, 0, 0, 0, 200);
+            TimeSpan secondAnim = new TimeSpan(0, 0, 2);
+
+            DoubleAnimation fadeOut= new DoubleAnimation
+            {
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(200)
+            };
+            DoubleAnimation fadeIn = new DoubleAnimation
+            {
+                To = 1,
+                Duration = timing
+            };
+            
+            Storyboard firstFading = new Storyboard();
+            Storyboard secondFading = new Storyboard();
+
+            firstFading.Children.Add(fadeOut);
+            secondFading.Children.Add(fadeIn);
+
+            Storyboard.SetTarget(firstFading, MacTextBox);
+            Storyboard.SetTargetProperty(firstFading, new PropertyPath(Control.OpacityProperty));
+
+            Storyboard.SetTarget(secondFading, MacTextBox);
+            Storyboard.SetTargetProperty(secondFading, new PropertyPath(Control.OpacityProperty));
+
+            firstFading.Completed += (s, a) => {
+                MacTextBox.Text = "Search MAC"; 
+                secondFading.Begin();
+            };
+
+            secondFading.Completed += (s, a) => {
+                MacTextBox.Focusable = true;
+            };
+
+            firstFading.Begin();
         }
 
         private void showErrorMessage(string message)
@@ -365,6 +815,7 @@ namespace EspInterface.Views
     {
         public Board b;
         public Image boardImage;
+        public Line connectLine;
     }
 
     //Code for Value Converters
