@@ -31,7 +31,9 @@ namespace EspInterface
 
         List<menuItem> listItems;
         List<Board> boards;
-        private DebugPhase phase = DebugPhase.monitor;
+        private DebugPhase phase = DebugPhase.setup;
+
+
 
         public enum DebugPhase
         {
@@ -76,7 +78,6 @@ namespace EspInterface
                     boards[2].posX = 10; boards[2].posY = 8;
                     boards[3].posX = 5; boards[3].posY = 5;
                     boards[4].posX = 9; boards[4].posY = 0;
-
                     ObservableCollection<Board> obsBoards = new ObservableCollection<Board>(boards);
                     monitor.boards = obsBoards;
                     monitor.maxRoomSize = 10;
@@ -138,7 +139,6 @@ namespace EspInterface
                 newDevices.Add(new Device("First"+i, 0.2, 0.4, "00,00,00", "date", "time", monitor.maxRoomSize));
 
                 newDevices.Add(new Device("Second"+i, 3.2, 3.4, "00,00,00", "date", "time", monitor.maxRoomSize));
-
                 newDevices.Add(new Device("Third"+i, 0.2, 4.1, "00,00,00", "date", "time", monitor.maxRoomSize));
                 //Simulate Trilateration Calculation
                 Thread.Sleep(100);*/
@@ -161,9 +161,6 @@ namespace EspInterface
                 //Simulate scanning room
                 monitor.startedScanning();
                 Thread.Sleep(60000);
-
-
-
             }
         }
 

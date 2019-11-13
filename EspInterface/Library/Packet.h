@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <string>
 #pragma once
 
 class Packet
@@ -27,5 +28,10 @@ public:
 	void setBoardMac(std::string mac);
 	void printPacket();
 	void printFile(FILE *fd);
+	std::string get_board_mac();
+	std::string get_device_addr();
+	int8_t get_rssi();
+	uint64_t get_timestamp();
+	std::string get_seq_ctl();
 };
 

@@ -36,5 +36,8 @@ namespace EspInterface.ViewModels
         [DllImport("Library.dll")]
         public static extern void serverGo(IntPtr instance);
 
+/*      [DllImport("Library.dll")]
+                public static extern int getDevicesAndPos(IntPtr instance, char[] listOfMac, int[] listOfPosX, int[] listOfPosY, IntPtr nDevices);
+*/
     }
 }

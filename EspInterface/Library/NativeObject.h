@@ -16,6 +16,7 @@ public:
 	void set_value(int value);
 	int checkMacAddr();
 	void getDevices();
+	//int getDevicesAndPos(char *listOfMac, int *listOfPosX, int *listOfPosY, int *nDevices);
 	int set_board_user(char *macAddr, int posx, int posy);
 	int set_board_toCheck(char *macAddr);
 	void serverGo();
@@ -23,8 +24,8 @@ public:
 	//list<Board> list1; delete if vector works
 	vector<Board> boardsVect;  // vector containing final positions of all boards truly connected
 	vector<Board> boardsVect2; //the one we use for the CheckMacAddress, posx and posy of all boards is 0 here
-	PacketQueue* pkt;
-	Server* server;
+	PacketQueue pkt;
+	Server *server;
 
 private:
 	int counter;

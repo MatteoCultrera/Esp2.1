@@ -143,6 +143,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ListBoxItem">
+
                             <Border BorderThickness="0, 0.5, 0, 0.5" BorderBrush="#000000">
                                 <StackPanel Width="180" Height="77.5" Name="Sp" Margin="0,0,0,0" Orientation="Horizontal">
                                     <Image Width="26.16" Height="42" Source="/Resources/Icons/deviceSelectedDiscrete.png" Margin="15"/>
@@ -153,7 +154,9 @@
                                             <TextBlock Text="{Binding date}" FontSize="12" Foreground="#9EA3AA" Width="52.5" TextAlignment="Right"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Height="16">
+
                                             <TextBlock Text="{Binding yMeters, Converter={StaticResource yDevicePosition_StringFloatConverter}}" FontSize="12" Foreground="#9EA3AA" Width="52.5" TextAlignment="Left"/>
+
                                             <TextBlock Text="{Binding time}" FontSize="12" Foreground="#9EA3AA" Width="52.5" TextAlignment="Right"/>
                                         </StackPanel>
                                     </StackPanel>
@@ -169,6 +172,7 @@
 
                 <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
+
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Setter Property="Template">
@@ -328,6 +332,7 @@
 
         <Grid Canvas.Left="400" Canvas.Top="195" Name="gridListBox">
             <ListBox Height="310" Width="180"  Name="DevicesLB" VerticalAlignment="Top">
+
             </ListBox>
             <Grid.OpacityMask>
                 <VisualBrush Visual="{Binding ElementName=Border1}" />
@@ -359,6 +364,7 @@
                     </Style>
                 </Button.Style>
             </Button>
+
 
             <TextBox Name="MacTextBox"
                      Width="134" 

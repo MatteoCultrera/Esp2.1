@@ -22,6 +22,7 @@ public:
 	~Dispositivo() {};
 	Dispositivo(const Dispositivo& dis);
 	void inserisciMAC(std::string new_MACaddr);
+	void setPos(int posx,int posy);
 	void aggiungiMisura(Misura new_misura);
 	void inserisciSchede(std::vector <std::string>& new_schede);
 

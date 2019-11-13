@@ -26,7 +26,7 @@ namespace EspInterface.ViewModels
         private List<Device> totalDevicesList;
         private int currentX, currentY;
         private Timer roomCheckTimer;
-        private int counter = 60;
+        private int counter = 60
         private bool[,] mask = new bool[10, 10];
 
 
@@ -55,7 +55,6 @@ namespace EspInterface.ViewModels
                     _boards = value;
 
                     this.NotifyPropertyChanged("boards");
-
                     generateMatrix();
                 }
                 
@@ -172,6 +171,7 @@ namespace EspInterface.ViewModels
             for (int i = 0; i < boards.Count; i++)
             {
                 pol[i] = new Point(boards[i].posX, boards[i].posY);
+
             }
 
 
@@ -200,6 +200,8 @@ namespace EspInterface.ViewModels
             }
             return result;
         }
+
+        
 
         public void NotifyPropertyChanged(string propName)
         {
@@ -237,6 +239,7 @@ namespace EspInterface.ViewModels
                 return devicesInGrid[x][y].Count;
             }
         }
+
 
         public Device findDevice(string MAC)
         {

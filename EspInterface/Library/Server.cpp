@@ -6,13 +6,15 @@
 #include <mutex>
 #include <thread>
 #include "Trilateration.h"
+#include "Funzioni_db.h"
 
 using namespace std;
 
 int nameCount = 1;
 int NUMBER_ESP;
 
-vector<Dispositivo>* devicesFound = NULL;
+vector<Dispositivo> devicesFound;
+mutex mtx;
 
 HANDLE smWrite;
 DWORD bytesWritten;
@@ -31,47 +33,71 @@ bool WriteSharedMemoryArea(string macToSend,int timeout)
 		return true;
 }
 
-void setTrilateration(vector<Board>*boards)
+void Server::setTrilateration(PacketQueue &pq, vector<Board>(&boards))
 {
+	//TODO controllare il caso in cui boards sia nullo 
+	cout << "trilateration thread t1 started " << endl;
+	Trilateration tr(boards);
 
-	Trilateration tr= Trilateration(boards);
-	vector<Dispositivo>* tmpDevicesFound;
-
-	/* Per adesso infinito ma dovrebbe esserci qualche variabile di controllo per sapere quando va chiuso */
-	while (1) 
+	/* Per adesso infinito ma dovrebbe esserci qualche variabile di controllo per sapere quando va chiuso, in teoria quando finisce la serverGo() */
+	while (1)
 	{
 		/* Aspetto che il file sia pronto */
+		cout << "T: waiting for sfull" << endl;
 		WaitForSingleObject(sFull, INFINITE);
-
+		cout << "T: scan file" << endl;
 		/* Leggo il file */
-		tr.scanFile();
-
+		tr.scanFile(pq);
+		cout << "T: releasing semaphore" << endl;
 		/* Sveglio il server */
 		ReleaseSemaphore(sEmpty, 1, NULL);
 
 		/* Calcolo le coordinate dei dispositivi */
 
-		tmpDevicesFound = tr.calcCoords();
+		vector<Dispositivo> &tmpDevicesFound = tr.calcCoords();
 
-		//acquisisco mutex
-		devicesFound = tmpDevicesFound;
-		//rilascio mutex
+
+
+		cout << "T: wait for mutex" << endl;
+		/* prendo mutex per non riempire il vettore mentre l'interfaccia sta prendendo i valori dallo stesso*/
+		mtx.lock();
+
+
+
+		devicesFound.clear();
+		for (auto v : tmpDevicesFound)
+		{
+			devicesFound.push_back(v);
+		}
+
+
+
+		cout << "T: release mutex" << endl;
+		/*release mutex*/
+		mtx.unlock();
 
 	}
-	
 }
 
-vector<Dispositivo>*
+/*
+vector<Dispositivo>&
 Server::getDevices() 
 {
-	vector<Dispositivo>* tmpDevices;
+	vector<Dispositivo> tmpDevices;
+	cout << "entering server->getDevices" << endl;
+	//acquisco mutex per passare il vettore di disp. trovati a interfaccia
+	mtx.lock();
 
-	//acquisisco mutex
-	tmpDevices = devicesFound;
-	//rilascio mutex
+	for (auto v : devicesFound)
+	{
+		tmpDevices.push_back(v);
+	}
+	mtx.unlock();
 
 	return tmpDevices;
 }
+*/
+
 
 Server::Server() {
 }
@@ -93,7 +119,14 @@ Server::Server(int number)
 	/*creo i semafori per la trilaterazione*/
 	sFull = CreateSemaphore(NULL, 0, 1, NULL);
 	sEmpty = CreateSemaphore(NULL, 0, 1, NULL);
-
+	/*conn = ConnectDB();
+	if (!conn)
+	{
+		cout << "Errore durante la setupDB: " << mysql_error(conn) << endl;
+		WSResult = 0;
+		//mysql_close(conn); when we need to shut down the db conn
+	}*/
+	cout << "Connessione Server e DB eseguita con successo\n";
 }
 
 void handler(int signo) {
@@ -175,17 +208,22 @@ int Server::doSetup() {
 }
 
 
-int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
+int Server::serverGo(PacketQueue &pq, vector<Board>&boards) {
 	cout << "entering serverGo" << endl;
-	
+	/*if (InsertDB(conn, "mac:di:prova", 1.003, 3.001))//, 123456))
+	{
+		cout << "Errore nella query INSERT" << endl;
+	}*/
+
 	/*inizio il set della trilaterazione*/
-	thread t1(setTrilateration, boards);
+	thread t1(&Server::setTrilateration, this, std::ref(pq), std::ref(boards));
 	
-	for (auto v : boards)
+	/*for (auto v : boards)
 	{
 		v.printInfo();
 		cout  << " " << v.getSocket() << " "<<  v.getAddress() << endl;
-	}
+	}*/
+
 	int acceptRes = 1, value = 0, serverRes;
 
 	/* firstFlag: determines the entrance for receiving packets */
@@ -212,7 +250,7 @@ int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
 
 			serverRes = serverLoop(boards, firstFlag, secondFlag, value, setUpFlag, sniffingFlag, pq);
 			if (serverRes > 0) {
-				cout << "value = " << serverRes << endl;
+				cout << "value =  " << serverRes << endl;
 				value = serverRes;
 			}
 
@@ -225,8 +263,13 @@ int Server::serverGo(PacketQueue &pq, vector<Board>(&boards)) {
 }
 
 int Server::serverLoop(vector<Board>boards, bool& firstFlag, bool& secondFlag, int value, bool& setUpFlag, bool& sniffingFlag, PacketQueue &pq) {
-	cout << "entering serverLoop" << endl;
+	cout << "entering serverLoop " << endl;
 	int sendRes, recvRes;
+
+	/*if (SelectDB(conn))
+	{
+		cout << "Errore nella query SELECT" << endl;
+	}*/
 
 	/* Avoids the recv Packet at the first iteration */
 	if (firstFlag) {
@@ -305,12 +348,7 @@ int Server::serverLoop(vector<Board>boards, bool& firstFlag, bool& secondFlag, i
 /* I have to send only an ACK so i don't need to do it concurrently */
 /*				If value=1 send OK, if value=0 send NO				*/
 int Server::sendAck(vector<Board>boards, int value) {
-	cout << "entering sendAck" << endl;
-	for (auto v : boards)
-	{
-		v.printInfo();
-		cout << " " << v.getSocket() << " " << v.getAddress() << endl;
-	}
+
 	int c_write;
 	char answer[2];
 
@@ -325,7 +363,7 @@ int Server::sendAck(vector<Board>boards, int value) {
 			}
 		}
 
-		cout << "...done. Sent OK" << endl;
+		cout << "...done. Sent OK" << endl << endl;;
 	}
 	else {
 
@@ -337,14 +375,14 @@ int Server::sendAck(vector<Board>boards, int value) {
 				return 0;
 			}
 		}
-		cout << "...done. Sent NO" << endl;
+		cout << "...done. Sent NO" << endl << endl;
 	}
 	return 1;
 }
 
 /*					Receive ack messagges from boards				*/
 int Server::recvAck(vector<Board>boards) {
-	cout << "entering recvack" << endl;
+	
 	int c_read, value = 1;
 	char recvbuf[2];
 
@@ -385,12 +423,7 @@ int Server::recvAck(vector<Board>boards) {
 
 /*   Close the sockets and zeros the memory of the boards array     */
 void Server::closeConnections(vector<Board>(&boards)) {
-	cout << "entering closeconnections" << endl;
-	for (auto v : boards)
-	{
-		v.printInfo();
-		cout << " " << v.getSocket() << " " << v.getAddress() << endl;
-	}
+	
 	cout << "Closing sockets...";
 	for (int i = 0; i < NUMBER_ESP; i++) {
 
@@ -431,13 +464,11 @@ int Server::sendA(SOCKET s, int value) {
 
 /*		Loops until the server has accepted NUMBER_ESP boards	    */
 int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &sniffingFlag, bool &secondFlag) {
-	cout << "entering acceptConnections" << endl;
-	cout << "START FIRST ACCEPT CONNECTIONS" << endl;
-	cout << "il numero di esp connesse è: " << NUMBER_ESP  << endl;
+
+	cout << "\nSaved MAC are: " << endl;
 	for (auto v : boards)
 	{
 		v.printInfo();
-		cout << " " << v.getSocket() << " " << v.getAddress() << endl;
 	}
 
 	int connections = 0;		/* Count for the connections */
@@ -451,8 +482,7 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 	/* Try accepting the predicted number of connections */
 	while (connections != NUMBER_ESP) {
 
-		cout << "\t\tAccepting connections..." << endl;
-		cout << "\t\tconnections:" << connections <<  endl;
+		cout << "Accepting connections..." << endl;
 
 		/* Timeout structure */
 		fd_set sset;
@@ -510,12 +540,12 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 			char buffer[18];
 			cread = recv(client_socket, buffer, 18, 0);
 			if (cread != 18) {
-				cout << "MAC not received. Error: " << WSAGetLastError() << endl;
+				cout << "\tMAC not received. Error: " << WSAGetLastError() << endl;
 				closesocket(client_socket);
 				errorFlag = 1;
 			}
 			else {
-				cout << "MAC received " << buffer << endl;
+				cout << "\tMAC received " << buffer << endl;
 				errorFlag = 0;
 			}
 
@@ -526,7 +556,7 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 
 				/* Check if the connection is not coming from an already saved board */
 				for (int i = 0; i < NUMBER_ESP; i++) {
-					cout << "COMPARING saved MAC: " << boards[i].getMAC() << " and found MAC: " << MAC << endl;
+					//cout << "COMPARING saved MAC: " << boards[i].getMAC() << " and found MAC: " << MAC << endl;
 					if (boards[i].getMAC().compare(MAC) == 0) {
 						newBoardFlag = 0;
 						index = i;
@@ -534,18 +564,18 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 				}				
 
 				if (newBoardFlag) {
-					cout << "Different socket found!" << endl;
+					cout << "\tDifferent socket found!" << endl;
 					closesocket(client_socket);
 				}
 				else {
-					showAddr("Connection accepted from: ", &caddr, MAC);
+					showAddr("\tConnection accepted from: ", &caddr, MAC);
 					boards[index].setSocket(client_socket);
 					connections = connections++;
 
 					/* Discriminates a board that can detach from electricity while sniffing. Need to do not receive packets */
 					if (sniffingFlag) {
 						if (countTimeout > 0) {
-							cout << "The board has connected before the sniffing time end" << endl;
+							cout << "\tThe board has connected before the sniffing time end" << endl;
 							result = 2;
 						}
 					}
@@ -554,7 +584,7 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 		}
 	}
 
-	cout << "Server has accepted " << NUMBER_ESP << " connections!" << endl;
+	cout << "Server has accepted " << NUMBER_ESP << " connections!" << endl << endl;
 
 	return result;
 }
@@ -562,7 +592,6 @@ int Server::AcceptConnections(vector<Board>(&boards), int passive_socket, bool &
 /*      Shows the address of the host passed among the values       */
 void Server::showAddr(const char * s, struct sockaddr_in *a, string MAC)
 {
-	cout << "entering showAddr" << endl;
 	char buf[INET_ADDRSTRLEN];
 
 	if (inet_ntop(AF_INET, &(a->sin_addr), buf, sizeof(buf)) != NULL)
@@ -605,7 +634,12 @@ int Server::recvPacketsSeq(vector<Board>boards, PacketQueue &pq) {
 
 	/* DELETE WHEN NO MORE NECESSARY */
 	//nameCount++;
-
+	/*ha finito di riempire la coda di pacchetti con le rilevazioni delle n schedine, può partire la trilaterazione*/
+	ReleaseSemaphore(sFull, 1, NULL);
+	cout << "S:sfull released, wait for sempty" << endl;
+	/*attendo che trilateration prenda tutti i dati dalla packetqueue*/
+	WaitForSingleObject(sEmpty, INFINITE);
+	cout << "S:sempty acquired by server, serverloop again" << endl;
 	return res;
 }
 
@@ -756,10 +790,6 @@ int Server::recvPseq(SOCKET s, string MAC, FILE *fd, PacketQueue &pq) {
 		// DELETE WHEN NO MORE NECESSARY
 		p.printFile(fd);
 	}
-
-	ReleaseSemaphore(sFull, 1, NULL);
-	WaitForSingleObject(sEmpty, INFINITE);
-
 	return 1;
 }
 
@@ -794,9 +824,9 @@ Server::~Server()
 	}
 }
 
-int Server::acceptBoard(int x,vector<Board>(&boards)) {
+int Server::acceptBoard(vector<Board>(&boards)) {
 
-	cout << "Enter acceptBoard" << endl;
+	//cout << "Enter acceptBoard" << endl;
 
 	int attempts = 0;									/* Number of attemps to decide when quit the program */
 	int client_socket;
@@ -853,28 +883,42 @@ int Server::acceptBoard(int x,vector<Board>(&boards)) {
 				errorFlag = 1;
 			}
 			else {
-				cout << "\tMAC received " << buffer << endl;
+				//cout << "\tMAC received " << buffer << endl;
 				errorFlag = 0;
 			}
 
 			/* If the reading of the MAC address has been done succesfully */
 			if (!errorFlag) {
-				cout << "da interfaccia " << boards[x].getMAC() << endl;
+				//cout << "da interfaccia " << boards[x].getMAC() << endl;
 				string MAC(buffer);
-				cout << "entering strcmp" << endl;
-				if (strcmp(boards[x].getMAC().c_str(), MAC.c_str()) == 0)
+				//cout << "entering strcmp" << endl;
+
+				for (int x = 0; x < NUMBER_ESP; x++) 
 				{
-					//cout << "\t\tFound" << endl;
-					showAddr("New connection accepted from: ", &caddr, MAC);
-					boards[x].setSocket(client_socket);
-					boards[x].setAddress(caddr.sin_addr.s_addr);
-					result = 0;
-					found = true;
+					//cout << "COMPARING saved MAC: " << boards[i].getMAC() << " and found MAC: " << MAC << endl;
+					if (strcmp(boards[x].getMAC().c_str(), MAC.c_str()) == 0)
+					{
+						//cout << "\t\tFound" << endl;
+						if (std::find(boardsIndexConnected.begin(), boardsIndexConnected.end(), x) != boardsIndexConnected.end()) 
+						{
+							/* Board già connessa */
+							showAddr("Connection already accepted from: ", &caddr, MAC);
+						}
+						else 
+						{
+							/* Nuova Board da connettere */
+							showAddr("New connection accepted from: ", &caddr, MAC);
+							boards[x].setSocket(client_socket);
+							boards[x].setAddress(caddr.sin_addr.s_addr);
+							result = x;
+							boardsIndexConnected.push_back(x);
+							found = true;
+							break;
+						}
+					}
 				}
-				else {
-					cout << "\t\tNot found" << endl;
+				if (!found)
 					closesocket(client_socket);
-				}
 			}
 		}
 	}

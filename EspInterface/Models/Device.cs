@@ -65,7 +65,6 @@ namespace EspInterface.Models
                 }
             }
         }
-
         
         public double xMeters
         {

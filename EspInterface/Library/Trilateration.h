@@ -3,7 +3,9 @@
 #include <vector>
 #include "Dispositivo.h"
 #include "Misura.h"
+#include "PacketQueue.h"
 #include "Board.h"
+#include "Packet.h"
 
 class Trilateration
 {
@@ -15,15 +17,17 @@ private:
 	std::map<std::string, Dispositivo> dispositivi;
 	std::map<std::string, Board>::iterator it_schede;
 	std::map<std::string, Dispositivo>::iterator it_dispositivi;
+	vector<Dispositivo> devicesFound;
 	double x, y;
 	int roundx, roundy;
+	string foundMac;
 
 public:
 
-	Trilateration(vector<Board> *boards);
+	Trilateration(vector<Board>(&boards));
 	~Trilateration() {};
 
-	void scanFile();
-	vector<Dispositivo>* calcCoords();
-
+	void scanFile(PacketQueue &pq);
+	vector<Dispositivo>& calcCoords();
+	
 };
