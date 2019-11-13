@@ -79,10 +79,10 @@
     </ApplicationDefinition>
     <Compile Include="Models\Board.cs" />
     <Compile Include="Models\Device.cs" />
-    <Compile Include="ViewModels\ManagedObject.cs" />
-    <Compile Include="ViewModels\ManagedWrapper.cs" />
+    <Compile Include="Backend\ManagedObject.cs" />
+    <Compile Include="Backend\ManagedWrapper.cs" />
     <Compile Include="ViewModels\MonitorModel.cs" />
-    <Compile Include="ViewModels\ServerInterop.cs" />
+    <Compile Include="Backend\ServerInterop.cs" />
     <Compile Include="ViewModels\SetupModel.cs" />
     <Compile Include="ViewModels\StatisticsModel.cs" />
     <Compile Include="Views\DialogChooseBoard.xaml.cs">

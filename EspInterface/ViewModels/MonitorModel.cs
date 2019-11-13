@@ -26,7 +26,7 @@ namespace EspInterface.ViewModels
         private List<Device> totalDevicesList;
         private int currentX, currentY;
         private Timer roomCheckTimer;
-        private int counter = 60
+        private int counter = 60;
         private bool[,] mask = new bool[10, 10];
 
 

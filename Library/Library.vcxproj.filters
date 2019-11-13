@@ -27,12 +27,6 @@
     <ClInclude Include="..\EspInterface\Library\targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\EspInterface\Library\NativeObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\EspInterface\Library\NativeWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\EspInterface\Library\Dispositivo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -60,12 +54,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\EspInterface\Library\stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\EspInterface\Library\NativeObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\EspInterface\Library\NativeWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\EspInterface\Library\Dispositivo.cpp">

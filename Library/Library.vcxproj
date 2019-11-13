@@ -143,8 +143,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\EspInterface\Library\Misura.h" />
-    <ClInclude Include="..\EspInterface\Library\NativeObject.h" />
-    <ClInclude Include="..\EspInterface\Library\NativeWrapper.h" />
     <ClInclude Include="..\EspInterface\Library\Packet.h" />
     <ClInclude Include="..\EspInterface\Library\Server.h" />
     <ClInclude Include="..\EspInterface\Library\stdafx.h" />
@@ -158,8 +156,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\EspInterface\Library\Misura.cpp" />
-    <ClCompile Include="..\EspInterface\Library\NativeObject.cpp" />
-    <ClCompile Include="..\EspInterface\Library\NativeWrapper.cpp" />
     <ClCompile Include="..\EspInterface\Library\Packet.cpp" />
     <ClCompile Include="..\EspInterface\Library\PacketQueue.cpp" />
     <ClCompile Include="..\EspInterface\Library\Trilateration.cpp" />

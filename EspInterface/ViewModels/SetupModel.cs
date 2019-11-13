@@ -262,29 +262,6 @@ namespace EspInterface.ViewModels
 
         }
 
-/*      elimina quando funziona correttamente la checkMacAddr asincrona
-        public delegate void ExampleCallback(int[] resArray, int boards, ServerInterop thr); // in order to accept thread returns, we must add this class. do not delete ! 
-
-        public static void ResultCallback(int[] resArray, int boards, ServerInterop thr)
-        {
-            int greenBoards = 0;
-            for (int i = 0; i < boards; i++) { //x matte qui il thread ritorna il valore del checkMacAddress ! 
-                if (resArray[i] == 0)
-                    Debug.WriteLine("Board " + (i + 1) + " SET RED COLOR");  // board non è connessa al server, devi colorarla di rosso. devi tornare allo screen in cui vengono inseriti tutti i macaddress delle board x modificare gli errati
-                else
-                {
-                    Debug.WriteLine("Board " + (i + 1) + " SET GREEN COLOR"); //board  è connessa al server, devi colorarla di verde
-                    greenBoards++;
-                }
-            }
-            if (greenBoards == boards) //all boards are connected
-            {
-                Thread t = new Thread(new ThreadStart(thr.CreateSetBoard));
-                t.Start();
-            }
-        }*/
-
-
         private void okClick(object sender)
         {
             switch (screen) {
@@ -333,20 +310,6 @@ namespace EspInterface.ViewModels
                     screen3?.Invoke(this, null);
                     //Start connecting with the server
 
-                    //nel costruttore del serverInterop setto il costruttore del server e lancio server.dosetup()
-                    if(thr == null)
-                        thr = new ServerInterop(boards, BoardObjs, this);
-                 
-                    Thread t1 = new Thread(thr.connectBoards);
-
-                    if (t1.IsAlive)
-                    {
-                        t1.Abort();
-                    }
-
-                    t1.Start();
-
-
                     //before launching the server thread we check if it already exists
                     /*if (t != null && !t.IsAlive)
                     {
@@ -392,15 +355,6 @@ namespace EspInterface.ViewModels
 
 
                     }
-                    //ora che le schedine sono connesse e ho inserito le posizioni, lancio t2.serverGo()
-                    if (t2 == null)
-                    {
-                           t2 = new Thread(new ThreadStart(thr.ServerGo));
-                           t2.Start();
-                            Debug.WriteLine("t2 created and started");
-                    }
-                    else
-                        Debug.WriteLine("t2 already running!");
 
                     //MessageBox.Show(s);
                     var args = new ErrorEventArgs
