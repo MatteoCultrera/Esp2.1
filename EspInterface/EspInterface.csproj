@@ -77,10 +77,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Backend\Backend.cs" />
+    <Compile Include="Backend\DLLLibrary.cs" />
+    <Compile Include="Backend\ExposedWrapper.cs" />
     <Compile Include="Models\Board.cs" />
     <Compile Include="Models\Device.cs" />
-    <Compile Include="Backend\ManagedObject.cs" />
-    <Compile Include="Backend\ManagedWrapper.cs" />
     <Compile Include="ViewModels\MonitorModel.cs" />
     <Compile Include="Backend\ServerInterop.cs" />
     <Compile Include="ViewModels\SetupModel.cs" />

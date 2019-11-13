@@ -12,3 +12,6 @@ extern "C" LIBRARY_EXPORT ExposedFunctions* new_ExposedFunctions() {
 extern "C" LIBRARY_EXPORT void delete_ExposedFunctions(ExposedFunctions* instance) {
 	delete instance;
 }
+
+//DEBUG FUNCTIONS FROM SERVER
+

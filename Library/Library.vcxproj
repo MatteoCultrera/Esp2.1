@@ -139,28 +139,26 @@
   <ItemGroup>
     <ClInclude Include="..\EspInterface\Library\Board.h" />
     <ClInclude Include="..\EspInterface\Library\Dispositivo.h" />
-    <ClInclude Include="..\EspInterface\Library\Funzioni_db.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\EspInterface\Library\Misura.h" />
     <ClInclude Include="..\EspInterface\Library\Packet.h" />
     <ClInclude Include="..\EspInterface\Library\Server.h" />
     <ClInclude Include="..\EspInterface\Library\stdafx.h" />
     <ClInclude Include="..\EspInterface\Library\targetver.h" />
     <ClInclude Include="..\EspInterface\Library\Trilateration.h" />
+    <ClInclude Include="ExposedFunctions.h" />
+    <ClInclude Include="ExposedWrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\EspInterface\Library\Board.cpp" />
     <ClCompile Include="..\EspInterface\Library\Dispositivo.cpp" />
-    <ClCompile Include="..\EspInterface\Library\Funzioni_db.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\EspInterface\Library\Misura.cpp" />
     <ClCompile Include="..\EspInterface\Library\Packet.cpp" />
     <ClCompile Include="..\EspInterface\Library\PacketQueue.cpp" />
     <ClCompile Include="..\EspInterface\Library\Trilateration.cpp" />
     <ClCompile Include="..\EspInterface\Library\Server.cpp" />
     <ClCompile Include="..\EspInterface\Library\stdafx.cpp" />
+    <ClCompile Include="ExposedFunctions.cpp" />
+    <ClCompile Include="ExposedWrapper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
