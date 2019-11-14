@@ -22,7 +22,7 @@ Board::~Board()
 void
 Board::printInfo()
 {
-	cout << "my info are: " << MAC << " , " << bPosx << " , " << bPosy;
+	cout << " " << MAC << endl;
 }
 
 int

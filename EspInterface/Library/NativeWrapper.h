@@ -1,4 +1,5 @@
 #pragma once
+
 #include "NativeObject.h";
 
 #define LIBRARY_EXPORT _declspec (dllexport)
@@ -33,3 +34,5 @@ extern "C" LIBRARY_EXPORT void serverGo(NativeObject* instance);
 
 //set printBoardList
 extern "C" LIBRARY_EXPORT  void printBoardList(NativeObject* instance);
+
+//extern "C" LIBRARY_EXPORT int getDevicesAndPos(NativeObject* instance, char *listOfMac, int *listOfPosX, int *listOfPosY, int *nDevices);

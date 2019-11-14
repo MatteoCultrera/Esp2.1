@@ -57,11 +57,9 @@ namespace EspInterface.Views
         //Methods to subscribe events
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-
             MonitorModel mm = (MonitorModel)(this.DataContext);
 
             mm.newDataAvailable += newData_D;
-
             Style style = canvas.FindResource("deviceZoom") as Style;
 
             for (int i = 0; i < 10; i++)
@@ -247,6 +245,7 @@ namespace EspInterface.Views
 
             firstFading.Begin();
 
+
             updateBoardGrid_D();
             
         }
@@ -262,6 +261,7 @@ namespace EspInterface.Views
                     devicesMatrix[i][j].numDevices = mm.numDevices(i, j);
                     if(devicesMatrix[i][j].deviceCheckbox.IsChecked == true)
                     {
+
                         //NO devices searching currently
                         if (deviceSearched.Count == 0)
                         {

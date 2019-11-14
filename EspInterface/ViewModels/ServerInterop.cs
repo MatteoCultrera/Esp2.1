@@ -27,9 +27,15 @@ namespace EspInterface.ViewModels
         public ManagedObject myObj;
         private int boards;
         private ObservableCollection<Board> BoardObjs;
+        public ObservableCollection<Device> DeviceObjs;
         private int res;
+        private List<int> nToConnBoards;
         SetupModel instance;
-        
+
+        private char[] listOfMac = null;
+        private int[] listOfPosX = null;
+        private int[] listOfPosY = null;
+        private IntPtr nDevices;
 
 
         public ServerInterop(int boards, ObservableCollection<Board> BoardObjs, SetupModel instance)
@@ -48,85 +54,71 @@ namespace EspInterface.ViewModels
 
         public void connectBoards()
         {
+            nToConnBoards = Enumerable.Range(0, boards).ToList();
+
             foreach (Board b in BoardObjs)
             {
                 char[] c = b.MAC.ToCharArray(0, 17);
                 myObj.set_board_toCheck(c);
             }
 
-            foreach (Board b in BoardObjs)
+            while (nToConnBoards.Count != 0) /*controlla fino a quando non sono connesse tutte le schedine o fino al timeout , evito loop */
             {
-
                 res = myObj.checkMacAddr();
-                if (res == 0 && Application.Current != null)
-                {
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
-                        //This will be executed in the main thread
-                        instance.boardConnected(b.MAC);
-                    }));
-               
-                }
-                else if (Application.Current != null)
-                {
-                    Application.Current.Dispatcher.Invoke(new Action(() => {
-                        instance.errorBoard(b.MAC);
-                    }));
-                    //instance.errorBoard(b.MAC);
 
+                /* res -> [0-n] dove n = boards, accendi icona corrispondente */
+                /* res -> -1 significa timeout nel server quindi chiama errorBoard() */
+
+                if (res >= 0 && Application.Current != null)
+                {
+                    instance.boardConnected(BoardObjs[res].MAC);
+                    nToConnBoards.Remove(res);
+                }
+                else if (res == -1 && Application.Current != null)
+                {
+                    foreach (int i in nToConnBoards) /* chiamo la error per ogni schedina ancora presente nella lista di interi*/
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            instance.errorBoard(BoardObjs[i].MAC);
+                        }));
+
+                    }
                     break;
                 }
             }
         }
 
-      /*  
-       *  VERSIONE CON CALLBACK(PUò SEMPRE SERVIRE PER DOPO
-       *  public ServerInterop(SetupModel.ExampleCallback callbackDelegate, int boards, ObservableCollection<Board> BoardObjs)
-        {
-            callback = callbackDelegate;
-            this.boards = boards;
-            this.BoardObjs = new ObservableCollection<Board>(BoardObjs);
-            myObj = new ManagedObject(boards); //send number of boards
-            sharedArea = MemoryMappedFile.CreateNew("MAC_FOUND", sizeof(char)*12);  // ho creato la shared memory per passare i mac trovati
-            sharedAreaVS = sharedArea.CreateViewStream();// si apre la sm come se fosse un file
-            checkMac = new Mutex(false, "MAC_ADDR_MUTEX");
-        }*/
-            //this class and its methods are the ones called by the c# thread in setupModel. The Thread runs all server functions ! 
-
-
-        public void CheckMacAddr()
-        {
-
-            /* string tmp = string.Empty;
-             int y = 0;
-             foreach (Board b in BoardObjs)
-             {
-                 if (y != 0)
-                     tmp += ',' + b.MAC;
-                 else
-                     tmp = b.MAC;
-                 y++;
-             }
-             IntPtr result = myObj.checkMacAddr(tmp.ToCharArray(0, 17 * (y) + y - 1), tmp.Length); //check a single string with all macAdd. returns an array of int with 0 if macAddr not connecter, 1 otherwise
-             int[] resArray = new int[boards];
-             Marshal.Copy(result, resArray, 0, boards);
-             //callback(resArray, boards, this);
-             //x Matte :bisogna aggiungere che sulla base dell'array di int alcune schede diventano verdi altre rosse ! in alternativa (forse è meglio) tornare alla schermata di inserimento di tutte le schedine
-         
-            foreach (Board b in BoardObjs)
-            {
-                
-                res=myObj.checkMacAddr();
-                if(res == 0)
+                public void updateDevicePos() //chiamata in serverinterop.servergo
                 {
-                    boardConnected(b.MAC);
+ /*                   int res;
+                    char[] delimiter = { ',' };
+                    String[] lMac;
+
+                    if (DeviceObjs.Count != 0) // se sto mandando la n-esima lista di dispostivi trovati, pulisco prima la collection precedente
+                        DeviceObjs.Clear();
+
+                    res = myObj.getDeviceAndPos(listOfMac, listOfPosX, listOfPosY, nDevices);
+                    if (res != 0)
+                    {
+                        Debug.WriteLine("getDeviceAndPos error");
+                    }
+                    lMac = (new String(listOfMac)).Split(delimiter);
+                    for (int i = 0; i < nDevices.ToInt32(); i++)
+                    {
+                        Device dev = new Device(lMac[i], listOfPosX[i], listOfPosY[i]);
+                        DeviceObjs.Add(dev);
+                    }
+                   //a questo punto disegno i dispositivi rilevati chiamando un evento presente in monitor, es: 
+
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                                //instance.drawDevice();
+                            }));
+
+*/
                 }
-                else
-                {
-                    errorBoard(b.MAC);
-                }
-            }
-            */
-        }
+
 
         public void ServerGo()
         {
@@ -137,12 +129,11 @@ namespace EspInterface.ViewModels
                 myObj.set_board_user(b.MAC.ToCharArray(0, 17), b.posX, b.posY);
             }
             myObj.printBoardList();
-            Debug.WriteLine("All Boards connected. Object Board set. Gonna launch Server.go");
+            Debug.WriteLine("All Boards connected. Object Board set. Gonna launch Server.go\n\n");
             myObj.serverGo();
             //to do:
             //sleep 60 sec
-            //call myobj.devicesfound 
-            //callback (<list>macdevice,posx,posy) to draw the device found
+            //updateDevicePos();
             //sleep 60
         }
     }
