@@ -77,7 +77,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Backend\Backend.cs" />
+    <Compile Include="Backend\BackendInterface.cs" />
     <Compile Include="Backend\DLLLibrary.cs" />
     <Compile Include="Backend\ExposedWrapper.cs" />
     <Compile Include="Models\Board.cs" />

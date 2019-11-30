@@ -15,6 +15,8 @@ namespace EspInterface.Backend
         [DllImport("Library.dll")]
         public static extern void delete_ExposedFunctions(IntPtr instance);
 
+        [DllImport("Library,dll")]
+        public static extern void startMainThread(IntPtr instance);
 
 
     }

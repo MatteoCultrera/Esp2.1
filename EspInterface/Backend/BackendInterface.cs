@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace EspInterface.Backend
 {
-    class Backend
+    public class BackendInterface
     {
         private DLLLibrary library;
 
-        public Backend()
+        public BackendInterface()
         {
             library = new DLLLibrary();
+
+            library.startBackendThread();
         }
 
         

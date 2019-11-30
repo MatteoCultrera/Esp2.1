@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Threading;
 using EspInterface.Models;
+using EspInterface.Backend;
 
 namespace EspInterface
 {
@@ -28,10 +29,11 @@ namespace EspInterface
         public SetupModel setup;
         public MonitorModel monitor;
         public StatisticsModel statistics;
+        public BackendInterface backend;
 
         List<menuItem> listItems;
         List<Board> boards;
-        private DebugPhase phase = DebugPhase.setup;
+        private DebugPhase phase = DebugPhase.none;
 
 
 
@@ -46,6 +48,8 @@ namespace EspInterface
             setup = new SetupModel(this);
             monitor = new MonitorModel();
             statistics = new StatisticsModel();
+
+            backend = new BackendInterface();
 
             listItems = new List<menuItem>();
 

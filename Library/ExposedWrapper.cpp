@@ -13,5 +13,10 @@ extern "C" LIBRARY_EXPORT void delete_ExposedFunctions(ExposedFunctions* instanc
 	delete instance;
 }
 
+//Start Main Thread
+extern "C" LIBRARY_EXPORT void startMainThread(ExposedFunctions* instance) {
+	instance->startBackendThread();
+}
+
 //DEBUG FUNCTIONS FROM SERVER
 

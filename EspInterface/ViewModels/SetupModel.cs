@@ -131,7 +131,6 @@ namespace EspInterface.ViewModels
         public int numMac,res;
         public List<string> macList = new List<string>();
         public ServerInterop thr;
-        private ManagedObject myObj;
         Thread t,t2;
 
         public string textBoxEnabled {

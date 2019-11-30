@@ -24,7 +24,6 @@ namespace EspInterface.ViewModels
     public class ServerInterop
     {
        // private SetupModel.ExampleCallback callback;
-        public ManagedObject myObj;
         private int boards;
         private ObservableCollection<Board> BoardObjs;
         public ObservableCollection<Device> DeviceObjs;
@@ -42,7 +41,7 @@ namespace EspInterface.ViewModels
         {
             this.boards = boards;
             this.BoardObjs = new ObservableCollection<Board>(BoardObjs);
-            myObj = new ManagedObject(boards); //send number of boards
+            //myObj = new ManagedObject(boards); //send number of boards
             this.instance = instance;
             
             //metto qui la createsetboardtocheck?
@@ -59,12 +58,12 @@ namespace EspInterface.ViewModels
             foreach (Board b in BoardObjs)
             {
                 char[] c = b.MAC.ToCharArray(0, 17);
-                myObj.set_board_toCheck(c);
+                //myObj.set_board_toCheck(c);
             }
 
             while (nToConnBoards.Count != 0) /*controlla fino a quando non sono connesse tutte le schedine o fino al timeout , evito loop */
             {
-                res = myObj.checkMacAddr();
+                //res = myObj.checkMacAddr();
 
                 /* res -> [0-n] dove n = boards, accendi icona corrispondente */
                 /* res -> -1 significa timeout nel server quindi chiama errorBoard() */
@@ -126,11 +125,11 @@ namespace EspInterface.ViewModels
             foreach (Board b in BoardObjs)
             {
                 Debug.WriteLine(b.MAC);
-                myObj.set_board_user(b.MAC.ToCharArray(0, 17), b.posX, b.posY);
+                //myObj.set_board_user(b.MAC.ToCharArray(0, 17), b.posX, b.posY);
             }
-            myObj.printBoardList();
+            //myObj.printBoardList();
             Debug.WriteLine("All Boards connected. Object Board set. Gonna launch Server.go\n\n");
-            myObj.serverGo();
+            //myObj.serverGo();
             //to do:
             //sleep 60 sec
             //updateDevicePos();

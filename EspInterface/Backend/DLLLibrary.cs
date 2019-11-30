@@ -20,5 +20,10 @@ namespace EspInterface.Backend
             ExposedWrapper.delete_ExposedFunctions(native_instance);
         }
 
+        public void startBackendThread()
+        {
+            ExposedWrapper.startMainThread(native_instance);
+        }
+
     }
 }

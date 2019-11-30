@@ -20,13 +20,13 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{171F44D8-D7E3-469C-ACC2-3F89D5275B8A}</ProjectGuid>
+    <ProjectGuid>{D9A6C2C6-0AE0-4874-B56F-33872D7BB24D}</ProjectGuid>
     <RootNamespace>Library</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -45,7 +45,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -69,10 +69,8 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
@@ -80,26 +78,13 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\MySQL\MySQL Connector C++ 1.1.12\include;C:\Program Files\MySQL\MySQL Server 8.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <PostBuildEvent />
-    <PostBuildEvent>
-      <Command>xcopy /d /y $(SolutionDir)x64\Debug\*.* $(SolutionDir)EspInterface\bin\Debug\</Command>
-    </PostBuildEvent>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
-    <Link>
-      <AdditionalLibraryDirectories>C:\Program Files\MySQL\MySQL Connector C++ 1.1.12\lib\opt;C:\Program Files\MySQL\MySQL Server 8.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mysqlcppconn.lib;libmysql.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -128,35 +113,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>xcopy /d /y “$(SolutionDir)x64\Debug\*.*” “$(SolutionDir)Interop\bin\Debug\”</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\EspInterface\Library\Board.h" />
-    <ClInclude Include="..\EspInterface\Library\Dispositivo.h" />
-    <ClInclude Include="..\EspInterface\Library\Misura.h" />
-    <ClInclude Include="..\EspInterface\Library\Packet.h" />
-    <ClInclude Include="..\EspInterface\Library\Server.h" />
-    <ClInclude Include="..\EspInterface\Library\stdafx.h" />
-    <ClInclude Include="..\EspInterface\Library\targetver.h" />
-    <ClInclude Include="..\EspInterface\Library\Trilateration.h" />
     <ClInclude Include="ExposedFunctions.h" />
     <ClInclude Include="ExposedWrapper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\EspInterface\Library\Board.cpp" />
-    <ClCompile Include="..\EspInterface\Library\Dispositivo.cpp" />
-    <ClCompile Include="..\EspInterface\Library\Misura.cpp" />
-    <ClCompile Include="..\EspInterface\Library\Packet.cpp" />
-    <ClCompile Include="..\EspInterface\Library\PacketQueue.cpp" />
-    <ClCompile Include="..\EspInterface\Library\Trilateration.cpp" />
-    <ClCompile Include="..\EspInterface\Library\Server.cpp" />
-    <ClCompile Include="..\EspInterface\Library\stdafx.cpp" />
     <ClCompile Include="ExposedFunctions.cpp" />
     <ClCompile Include="ExposedWrapper.cpp" />
   </ItemGroup>
